@@ -1,15 +1,15 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body><title>Planificador HGCS 2° Medio</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body><title>Planificador de OA</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-/* Layout: two-column workbench (OA list | planning options) above a full-width document preview that mirrors the Word output */
+/* Layout: subject/level picker on top, then a two-column workbench (OA list | planning options), then a full-width preview that mirrors the Word output */
 :root{
   --bg:#F2F4F7; --panel:#FFFFFF; --ink:#16202B; --muted:#5A6774; --line:#D6DDE5; --soft:#E9EEF4;
   --accent:#234E8C; --accent-ink:#FFFFFF; --accent-soft:#E3EBF7;
   --u1:#9A4A1B; --u2:#2C6A5B; --u3:#6A3F8C; --u4:#1F5E9E;
-  --ok:#2C6A5B; --warn:#9A4A1B;
+  --ok:#2C6A5B; --warn:#A8441E;
   --paper:#FFFFFF; --paper-ink:#1B2430; --paper-line:#C9D2DD; --paper-head:#E9EEF5;
   --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
   --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -17,12 +17,12 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0F141A; --panel:#171E27; --ink:#E5EAF0; --muted:#9AA6B3; --line:#2B3643; --soft:#1F2833;
   --accent:#8EB4EC; --accent-ink:#0F141A; --accent-soft:#1E2B3E;
-  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#E09A6E;
+  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#F0A07A;
   --paper:#1B232D; --paper-ink:#E5EAF0; --paper-line:#344252; --paper-head:#222D3A; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0F141A; --panel:#171E27; --ink:#E5EAF0; --muted:#9AA6B3; --line:#2B3643; --soft:#1F2833;
   --accent:#8EB4EC; --accent-ink:#0F141A; --accent-soft:#1E2B3E;
-  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#E09A6E;
+  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#F0A07A;
   --paper:#1B232D; --paper-ink:#E5EAF0; --paper-line:#344252; --paper-head:#222D3A; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
@@ -30,24 +30,43 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 h1{font-family:var(--f-display);font-size:28px;line-height:1.15;margin:4px 0 0;text-wrap:balance}
-.lede{color:var(--muted);max-width:62ch;margin:6px 0 0}
+.lede{color:var(--muted);max-width:66ch;margin:6px 0 0}
 .steps{display:flex;gap:6px;flex-wrap:wrap}
 .steps span{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--panel)}
 .steps span.on{border-color:var(--accent);color:var(--accent);font-weight:600}
-.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:20px}
 @media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
 .panel>.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
 .ph h2{font-family:var(--f-display);font-size:17px;margin:0}
 .ph .count{font-size:12px;color:var(--muted)}
 .pb{padding:14px 16px}
+/* Picker */
+.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.subj{font:inherit;text-align:left;cursor:pointer;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:14px 14px 14px 18px;position:relative;display:grid;gap:3px;min-width:0}
+.subj::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 3px 3px 0;background:var(--sc)}
+.subj .sn{font-family:var(--f-display);font-weight:600;font-size:15px;line-height:1.25}
+.subj .sd{font-size:12px;color:var(--muted)}
+.subj .sl{font-size:11.5px;color:var(--sc);font-weight:600;letter-spacing:.03em}
+.subj:hover{border-color:var(--sc)}
+.subj[aria-pressed=true]{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 9%,var(--panel));box-shadow:inset 0 0 0 1px var(--sc)}
+.levels{margin-top:14px;display:grid;gap:8px}
+.levels .lab{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lvls{display:flex;flex-wrap:wrap;gap:8px}
+.lvl{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:9px 14px;display:grid;gap:1px;text-align:left}
+.lvl b{font-family:var(--f-display);font-size:15px}
+.lvl small{color:var(--muted);font-size:12px}
+.lvl[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.lvl[aria-pressed=true] small{color:var(--accent-ink);opacity:.85}
+.start{padding:22px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px;margin-top:20px}
+.start strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:16px;margin-bottom:4px}
 input[type=search],input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
 textarea{resize:vertical;min-height:60px}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.oa:focus-within{outline:2px solid var(--accent);outline-offset:1px}
 .oalist{max-height:760px;overflow:auto;padding:4px 16px 16px}
 @media (max-width:960px){.oalist{max-height:none}}
 .unit{margin-top:14px}
-.unit-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0 8px;border-bottom:2px solid var(--uc);position:sticky;top:0;background:var(--panel);z-index:1}
+.unit-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:2px solid var(--uc);position:sticky;top:0;background:var(--panel);z-index:1}
 .unit-h .ut{min-width:0}
 .unit-h .un{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--uc)}
 .unit-h .uname{font-family:var(--f-display);font-weight:600;font-size:14px;line-height:1.3}
@@ -64,8 +83,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .empty strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:16px;margin-bottom:4px}
 .sec{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px}
 .sec:last-child{border-bottom:0}
-.sec h3{margin:0;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;gap:8px;align-items:baseline}
-.sec h3 b{font-family:var(--f-display);color:var(--accent);font-size:13px}
+.sec h3{margin:0;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sub{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+.sub h4{margin:0;font-size:13px;font-family:var(--f-display)}
 .seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden}
 @media (max-width:520px){.seg{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .seg button{font:inherit;font-size:13px;padding:9px 6px;border:0;border-right:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
@@ -73,10 +93,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 @media (max-width:520px){.seg button:nth-child(2){border-right:0}.seg button:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.field{display:grid;gap:4px;min-width:0}
+.field{display:grid;gap:4px;min-width:0;align-content:start}
 .field label,.lab{font-size:12px;color:var(--muted);font-weight:500}
 .hint{font-size:12px;color:var(--muted)}
 .hint b{color:var(--ink);font-variant-numeric:tabular-nums}
+.hint.bad,.hint.bad b{color:var(--warn)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer;text-align:left}
 .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
@@ -85,10 +106,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .check{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
 .check input{accent-color:var(--accent);margin-top:2px}
 .check small{display:block;color:var(--muted);font-size:11.5px}
+.bloombar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
+.bloombar span{display:block;height:100%}
+.bloombar .b0{background:var(--u2)}.bloombar .b1{background:var(--u4)}.bloombar .b2{background:var(--u3)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:0}
 .summary{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
 .tag{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
 .tag b{color:var(--uc,var(--accent))}
-/* Preview */
 .preview{margin-top:24px}
 .pv-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .pv-bar h2{font-family:var(--f-display);font-size:20px;margin:0}
@@ -99,81 +124,90 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .msg{font-size:13px;color:var(--muted);min-height:1.2em}
 .msg.ok{color:var(--ok)}.msg.err{color:var(--warn)}
 .paperwrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line);background:var(--soft);padding:20px 12px}
-.doc{background:var(--paper);color:var(--paper-ink);max-width:880px;margin:0 auto;padding:36px 40px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-family:Calibri,Carlito,var(--f-body);font-size:13.5px;line-height:1.45}
+.doc{background:var(--paper);color:var(--paper-ink);max-width:900px;margin:0 auto;padding:36px 40px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-family:Calibri,Carlito,var(--f-body);font-size:13.5px;line-height:1.45}
 @media (max-width:600px){.doc{padding:22px 16px}}
 .doc h1{font-family:Calibri,Carlito,var(--f-body);font-size:22px;color:var(--accent);margin:0 0 6px}
 .doc h2{font-size:17px;color:var(--accent);margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--paper-line)}
 .doc h3{font-size:15px;margin:18px 0 6px}
 .doc p{margin:0 0 6px}
 .doc .small{font-size:12px;color:var(--muted)}
-.doc ul{margin:0 0 8px;padding-left:20px}
-.doc li{margin-bottom:3px}
 .doc table{width:100%;border-collapse:collapse;margin:4px 0 12px;table-layout:fixed}
 .doc td,.doc th{border:1px solid var(--paper-line);padding:6px 8px;vertical-align:top;text-align:left;font-size:12.5px;overflow-wrap:anywhere}
 .doc th{background:var(--paper-head);font-weight:700}
 .doc td.k{background:var(--paper-head);font-weight:700;width:24%}
 .doc td p{margin:0 0 4px}.doc td p:last-child{margin:0}
 .note{font-size:12px;color:var(--muted);margin-top:10px;max-width:80ch}
-@media (prefers-reduced-motion:no-preference){.oa,.chip,.btn{transition:background-color .15s,border-color .15s,color .15s}}
+@media (prefers-reduced-motion:no-preference){.oa,.chip,.btn,.subj,.lvl{transition:background-color .15s,border-color .15s,color .15s}}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Historia, Geografía y Ciencias Sociales · 2° Medio</div>
+      <div class="eyebrow" id="eyebrow">Planificación curricular · Bases Curriculares 7° básico a 2° medio</div>
       <h1>Planificador de OA</h1>
-      <p class="lede">Elige los Objetivos de Aprendizaje, define el horizonte de tiempo y la evaluación, y descarga la planificación en Word con indicadores, objetivos de clase, actividades, adecuaciones y actitudes.</p>
+      <p class="lede">Elige la asignatura y el nivel, selecciona los Objetivos de Aprendizaje, define el tiempo y la evaluación, y descarga la planificación en Word con indicadores, objetivos de clase, actividades, adecuaciones y actitudes.</p>
     </div>
     <div class="steps" aria-label="Pasos">
-      <span id="st1" class="on">1 · OA</span><span id="st2">2 · Tiempo</span><span id="st3">3 · Evaluación</span><span id="st4">4 · Documento</span>
+      <span id="st1" class="on">1 · Asignatura</span><span id="st2">2 · OA</span><span id="st3">3 · Opciones</span><span id="st4">4 · Documento</span>
     </div>
   </header>
 
-  <div class="grid">
-    <section class="panel" aria-labelledby="oa-h">
-      <div class="ph"><h2 id="oa-h">Objetivos de Aprendizaje</h2><span class="count" id="oa-count">0 seleccionados</span></div>
-      <div class="pb" style="padding-bottom:0"><input type="search" id="q" placeholder="Buscar por palabra clave (ej. Guerra Fría, Constitución, pobreza)"></div>
-      <div class="oalist" id="oalist"></div>
-    </section>
+  <section class="panel" aria-labelledby="pk-h">
+    <div class="ph"><h2 id="pk-h">Asignatura</h2><span class="count" id="pk-sum">Elige una asignatura para ver sus niveles</span></div>
+    <div class="pb">
+      <div class="subjects" id="subjects" role="group" aria-label="Asignaturas"></div>
+      <div class="levels" id="levels" hidden></div>
+    </div>
+  </section>
 
-    <section class="panel" aria-labelledby="cfg-h" id="cfgpanel">
-      <div class="ph"><h2 id="cfg-h">Opciones de planificación</h2><button class="btn-mini" id="clear" type="button">Limpiar selección</button></div>
-      <div id="cfg"></div>
+  <div class="start" id="start"><strong>Elige una asignatura y un nivel</strong>Luego aparecerán los Objetivos de Aprendizaje de ese nivel y las opciones de planificación.</div>
+
+  <div id="work" hidden>
+    <div class="grid">
+      <section class="panel" aria-labelledby="oa-h">
+        <div class="ph"><h2 id="oa-h">Objetivos de Aprendizaje</h2><span class="count" id="oa-count">0 seleccionados</span></div>
+        <div class="pb" style="padding-bottom:0"><input type="search" id="q" placeholder="Buscar por palabra clave"></div>
+        <div class="oalist" id="oalist"></div>
+      </section>
+      <section class="panel" aria-labelledby="cfg-h">
+        <div class="ph"><h2 id="cfg-h">Opciones de planificación</h2><button class="btn-mini" id="clear" type="button">Limpiar selección</button></div>
+        <div id="cfg"></div>
+      </section>
+    </div>
+
+    <section class="preview" aria-labelledby="pv-h">
+      <div class="pv-bar">
+        <div>
+          <h2 id="pv-h">Vista previa del documento</h2>
+          <div class="msg" id="msg"></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="dl" type="button">Descargar Word (.docx)</button>
+          <button class="btn ghost" id="cp" type="button">Copiar para pegar en Word o Docs</button>
+        </div>
+      </div>
+      <div class="paperwrap"><div class="doc" id="doc"></div></div>
+      <p class="note">Los textos de los OA están adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013) y de los Programas de Estudio. Antes de entregar la planificación, contrasta la redacción oficial en curriculumnacional.cl. Indicadores, actividades y adecuaciones son propuestas que puedes editar en Word.</p>
     </section>
   </div>
-
-  <section class="preview" id="preview" aria-labelledby="pv-h">
-    <div class="pv-bar">
-      <div>
-        <h2 id="pv-h">Vista previa del documento</h2>
-        <div class="msg" id="msg"></div>
-      </div>
-      <div class="actions">
-        <button class="btn" id="dl" type="button">Descargar Word (.docx)</button>
-        <button class="btn ghost" id="cp" type="button">Copiar para pegar en Word o Docs</button>
-      </div>
-    </div>
-    <div class="paperwrap"><div class="doc" id="doc"></div></div>
-    <p class="note">Los textos de los OA están adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013) y el Programa de Estudio 2° Medio. Antes de entregar la planificación, contrasta la redacción oficial en curriculumnacional.cl. Indicadores, actividades y adecuaciones son propuestas editables una vez abierto el archivo en Word.</p>
-  </section>
 </div>
 
 <script>
-/* ============ DATOS CURRICULARES ============ */
-const UNITS=[
- {id:1,name:"Crisis, totalitarismo y guerra en la primera mitad del siglo XX: desafíos para el Estado y la democracia en Chile y el mundo",weeks:10,oas:[1,2,3,4,5,6,7],
-  prop:"Que los estudiantes comprendan la crisis del liberalismo en la primera mitad del siglo XX, el surgimiento de los totalitarismos y la Segunda Guerra Mundial, y cómo Chile enfrentó la crisis de su sistema político y económico, reconstruyendo su institucionalidad y ampliando su democracia."},
- {id:2,name:"El mundo bipolar: proyectos políticos, transformaciones estructurales y quiebre de la democracia en Chile",weeks:10,oas:[8,9,10,11,12,13,14,15],
-  prop:"Que los estudiantes comprendan la Guerra Fría como marco del conflicto ideológico mundial y latinoamericano, y analicen las transformaciones estructurales en Chile, la polarización y el quiebre de la democracia en 1973 desde distintas interpretaciones."},
- {id:3,name:"Dictadura militar, transición política y los desafíos de la democracia en Chile",weeks:10,oas:[16,17,18,19,20,21],
-  prop:"Que los estudiantes comprendan la supresión del Estado de derecho y las violaciones a los derechos humanos durante la dictadura, las transformaciones económicas e institucionales, y el proceso de recuperación de la democracia y sus desafíos."},
- {id:4,name:"Formación ciudadana: Estado de derecho, sociedad y diversidad",weeks:8,oas:[22,23,24,25],
-  prop:"Que los estudiantes comprendan los derechos humanos y el Estado de derecho como bases de la convivencia democrática, y debatan sobre los desafíos pendientes del país: pobreza, desigualdad, sustentabilidad y diversidad."}
-];
-const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
-
-// Estructura: t texto OA · k tema corto · c conceptos · f focos [verbo, tema, pregunta] · i indicadores · a actividades [nombre, "mediante...", descripción, habilidad] · aa actitudes sugeridas
-const OA={
+/* =====================================================================
+   DATOS CURRICULARES
+   Por OA: t texto · k tema corto · c conceptos · f focos [verbo, tema, pregunta]
+   i indicadores (0 = nivel básico, 1-2 = intermedio, 3 = superior)
+   a actividades [nombre, "mediante…", descripción, habilidad] · aa actitudes sugeridas
+   ===================================================================== */
+const HIST={
+ area:"Historia, Geografía y Ciencias Sociales",level:"2° Medio",file:"HGCS_2M",unitWord:"Unidad",hab:"Habilidades (OAH)",
+ eje:n=>n>=22?"Formación ciudadana":"Historia",
+ units:[
+ {id:1,name:"Crisis, totalitarismo y guerra en la primera mitad del siglo XX: desafíos para el Estado y la democracia en Chile y el mundo",weeks:10,oas:[1,2,3,4,5,6,7],prop:"Que los estudiantes comprendan la crisis del liberalismo en la primera mitad del siglo XX, el surgimiento de los totalitarismos y la Segunda Guerra Mundial, y cómo Chile enfrentó la crisis de su sistema político y económico, reconstruyendo su institucionalidad y ampliando su democracia."},
+ {id:2,name:"El mundo bipolar: proyectos políticos, transformaciones estructurales y quiebre de la democracia en Chile",weeks:10,oas:[8,9,10,11,12,13,14,15],prop:"Que los estudiantes comprendan la Guerra Fría como marco del conflicto ideológico mundial y latinoamericano, y analicen las transformaciones estructurales en Chile, la polarización y el quiebre de la democracia en 1973 desde distintas interpretaciones."},
+ {id:3,name:"Dictadura militar, transición política y los desafíos de la democracia en Chile",weeks:10,oas:[16,17,18,19,20,21],prop:"Que los estudiantes comprendan la supresión del Estado de derecho y las violaciones a los derechos humanos durante la dictadura, las transformaciones económicas e institucionales, y el proceso de recuperación de la democracia y sus desafíos."},
+ {id:4,name:"Formación ciudadana: Estado de derecho, sociedad y diversidad",weeks:8,oas:[22,23,24,25],prop:"Que los estudiantes comprendan los derechos humanos y el Estado de derecho como bases de la convivencia democrática, y debatan sobre los desafíos pendientes del país: pobreza, desigualdad, sustentabilidad y diversidad."}],
+ OA:{
 1:{t:"Relacionar las transformaciones culturales del período de entreguerras con la ruptura de los cánones culturales y estéticos tradicionales, considerando el surgimiento de las vanguardias artísticas y el desarrollo de una cultura de masas (radio, cine, publicidad, deporte).",k:"las transformaciones culturales de entreguerras",c:["vanguardias","cultura de masas","entreguerras","modernidad"],
  f:[["Analizar","las vanguardias artísticas como ruptura de los cánones estéticos tradicionales","¿Por qué el arte de comienzos del siglo XX rompió con las formas tradicionales?"],["Relacionar","la masificación de la radio, el cine y la publicidad con nuevas formas de vida","¿Cómo cambió la vida cotidiana con la llegada de la cultura de masas?"],["Explicar","el impacto de la Primera Guerra Mundial en la confianza en el progreso","¿Qué efecto tuvo la guerra en la idea de progreso heredada del siglo XIX?"]],
  i:["Describen características de las vanguardias artísticas (cubismo, dadaísmo, surrealismo, expresionismo) a partir de obras.","Explican cómo las vanguardias rompieron con los cánones estéticos tradicionales.","Relacionan el desarrollo de la radio, el cine y la publicidad con el surgimiento de una cultura de masas.","Establecen relaciones entre las transformaciones culturales de entreguerras y la crisis de la confianza en el progreso."],
@@ -274,61 +308,299 @@ const OA={
  f:[["Reconocer","la diversidad social y cultural de Chile","¿Qué hace diverso a Chile?"],["Analizar","las formas de discriminación y sus efectos","¿Cómo se manifiesta la discriminación en nuestra vida diaria?"],["Evaluar","los desafíos de un mundo globalizado para la inclusión","¿Cómo convivir en una sociedad diversa?"]],
  i:["Reconocen expresiones de diversidad (cultural, étnica, de género, religiosa, migrante) en Chile.","Identifican formas de discriminación y sus efectos.","Analizan el marco legal contra la discriminación (Ley 20.609).","Proponen acciones para una convivencia inclusiva."],
  a:[["Mapa de la diversidad","el análisis de datos censales","Analizan datos de pueblos indígenas y población migrante por región y los representan en mapas.","d"],["Situaciones de discriminación","el estudio de casos","Analizan casos y proponen respuestas basadas en la Ley 20.609.","j"],["Campaña inclusiva","una campaña escolar","Diseñan una campaña para promover la inclusión en el establecimiento.","l"]],aa:["B","A"]}
+ },
+ oah:{a:"Establecer y fundamentar periodizaciones históricas mediante líneas de tiempo, reconociendo sucesión y simultaneidad.",b:"Analizar elementos de continuidad y cambio entre períodos y procesos.",c:"Analizar procesos considerando distintas duraciones (corta, mediana y larga) y ritmos.",d:"Representar la distribución espacial de fenómenos mediante mapas y herramientas tecnológicas.",e:"Analizar datos e información geográfica para elaborar inferencias y predicciones.",f:"Seleccionar fuentes considerando su confiabilidad, relevancia y diversidad.",g:"Evaluar críticamente fuentes e información como evidencia para argumentar.",h:"Comparar distintas interpretaciones historiográficas y geográficas.",i:"Investigar: formular preguntas e hipótesis, analizar información y comunicar resultados citando fuentes.",j:"Pensar críticamente: preguntar, inferir, cuestionar prejuicios, identificar sesgos y analizar multicausalidad.",k:"Participar en debates y conversaciones, argumentando y buscando acuerdos.",l:"Comunicar resultados de investigación con estructura lógica y evidencia pertinente.",m:"Elaborar argumentaciones escritas usando conceptos históricos y geográficos."},
+ oahs:{a:"Periodización",b:"Continuidad y cambio",c:"Duraciones y ritmos",d:"Mapas",e:"Datos e inferencias",f:"Selección de fuentes",g:"Fuentes como evidencia",h:"Interpretaciones",i:"Investigación",j:"Pensamiento crítico",k:"Debate y diálogo",l:"Comunicación",m:"Argumentación escrita"},
+ oaa:{A:["Respetar y defender la igualdad de derechos esenciales de todas las personas.","se promueve al analizar situaciones en que se vulneraron derechos y reconocer la dignidad de todas las personas."],B:["Respetar y valorar la diversidad cultural, religiosa y étnica, y el diálogo.","se promueve al escuchar y considerar perspectivas distintas a la propia durante el trabajo con fuentes y la discusión."],C:["Pensar en forma autónoma y reflexiva, con disposición a la crítica y la autocrítica.","se promueve al formular preguntas, contrastar fuentes y revisar críticamente las propias ideas."],D:["Valorar el aporte de las ciencias sociales a la comprensión de la realidad.","se promueve al usar conceptos y métodos de las ciencias sociales para explicar fenómenos actuales."],E:["Valorar la democracia y la ciudadanía activa, solidaria y responsable.","se promueve al valorar el diálogo, la participación y los acuerdos como formas de resolver conflictos."],F:["Valorar la convivencia pacífica y la igualdad entre hombres y mujeres.","se promueve al establecer normas de trabajo colaborativo que aseguren una participación equitativa."],G:["Interesarse por el pasado y valorar el conocimiento histórico para comprender el presente.","se promueve al relacionar los procesos estudiados con situaciones del presente."],H:["Desarrollar actitudes favorables a la protección del medio ambiente y al desarrollo sustentable.","se promueve al vincular los procesos estudiados con su impacto en el medio ambiente y el territorio."],I:["Demostrar una actitud propositiva, con responsabilidad social y compromiso con el bien común.","se promueve al proponer soluciones creativas y responsables a problemas de la comunidad."],J:["Usar las tecnologías de la información de forma responsable, reconociendo el trabajo de otros.","se promueve al citar las fuentes utilizadas y usar la tecnología de manera ética."]},
+ oaas:{A:"Igualdad de derechos",B:"Diversidad y diálogo",C:"Pensamiento autónomo",D:"Valor de las ciencias sociales",E:"Democracia y ciudadanía",F:"Convivencia e igualdad de género",G:"Interés por el pasado",H:"Medio ambiente",I:"Actitud propositiva",J:"Uso responsable de TIC"},
+ res:{a:"Papel kraft o plantilla de línea de tiempo",b:"Tabla de continuidad y cambio",c:"Esquema de duraciones",d:"Mapas mudos y atlas",e:"Gráficos y tablas de datos",f:"Dossier de fuentes",g:"Dossier de fuentes primarias y guía de análisis",h:"Textos historiográficos y tabla comparativa",i:"Pauta de investigación y acceso a internet",j:"Organizador gráfico",k:"Pauta de debate y roles",l:"Materiales para el producto (cartulinas, dispositivos)",m:"Pauta de escritura argumentativa"}
 };
-const EJE=n=>n>=22?"Formación ciudadana":"Historia";
 
-const OAH={a:"Establecer y fundamentar periodizaciones históricas mediante líneas de tiempo, reconociendo sucesión y simultaneidad.",b:"Analizar elementos de continuidad y cambio entre períodos y procesos.",c:"Analizar procesos considerando distintas duraciones (corta, mediana y larga) y ritmos.",d:"Representar la distribución espacial de fenómenos mediante mapas y herramientas tecnológicas.",e:"Analizar datos e información geográfica para elaborar inferencias y predicciones.",f:"Seleccionar fuentes considerando su confiabilidad, relevancia y diversidad.",g:"Evaluar críticamente fuentes e información como evidencia para argumentar.",h:"Comparar distintas interpretaciones historiográficas y geográficas.",i:"Investigar: formular preguntas e hipótesis, analizar información y comunicar resultados citando fuentes.",j:"Pensar críticamente: preguntar, inferir, cuestionar prejuicios, identificar sesgos y analizar multicausalidad.",k:"Participar en debates y conversaciones, argumentando y buscando acuerdos.",l:"Comunicar resultados de investigación con estructura lógica y evidencia pertinente.",m:"Elaborar argumentaciones escritas usando conceptos históricos y geográficos."};
-const OAHshort={a:"Periodización",b:"Continuidad y cambio",c:"Duraciones y ritmos",d:"Mapas",e:"Datos e inferencias",f:"Selección de fuentes",g:"Fuentes como evidencia",h:"Interpretaciones",i:"Investigación",j:"Pensamiento crítico",k:"Debate y diálogo",l:"Comunicación",m:"Argumentación escrita"};
-const OAA={A:["Respetar y defender la igualdad de derechos esenciales de todas las personas.","se promueve al analizar situaciones en que se vulneraron derechos y reconocer la dignidad de todas las personas."],B:["Respetar y valorar la diversidad cultural, religiosa y étnica, y el diálogo.","se promueve al escuchar y considerar perspectivas distintas a la propia durante el trabajo con fuentes y la discusión."],C:["Pensar en forma autónoma y reflexiva, con disposición a la crítica y la autocrítica.","se promueve al formular preguntas, contrastar fuentes y revisar críticamente las propias ideas."],D:["Valorar el aporte de las ciencias sociales a la comprensión de la realidad.","se promueve al usar conceptos y métodos de las ciencias sociales para explicar fenómenos actuales."],E:["Valorar la democracia y la ciudadanía activa, solidaria y responsable.","se promueve al valorar el diálogo, la participación y los acuerdos como formas de resolver conflictos."],F:["Valorar la convivencia pacífica y la igualdad entre hombres y mujeres.","se promueve al establecer normas de trabajo colaborativo que aseguren una participación equitativa."],G:["Interesarse por el pasado y valorar el conocimiento histórico para comprender el presente.","se promueve al relacionar los procesos estudiados con situaciones del presente."],H:["Desarrollar actitudes favorables a la protección del medio ambiente y al desarrollo sustentable.","se promueve al vincular los procesos estudiados con su impacto en el medio ambiente y el territorio."],I:["Demostrar una actitud propositiva, con responsabilidad social y compromiso con el bien común.","se promueve al proponer soluciones creativas y responsables a problemas de la comunidad."],J:["Usar las tecnologías de la información de forma responsable, reconociendo el trabajo de otros.","se promueve al citar las fuentes utilizadas y usar la tecnología de manera ética."]};
-const OAAshort={A:"Igualdad de derechos",B:"Diversidad y diálogo",C:"Pensamiento autónomo",D:"Valor de las ciencias sociales",E:"Democracia y ciudadanía",F:"Convivencia e igualdad de género",G:"Interés por el pasado",H:"Medio ambiente",I:"Actitud propositiva",J:"Uso responsable de TIC"};
+/* --- Ciencias Naturales 1° Medio: habilidades y actitudes compartidas --- */
+const CN_OAH={a:"Observar y describir objetos, procesos y fenómenos con detalle, usando los sentidos.",b:"Formular preguntas o problemas, a partir del conocimiento científico, que puedan ser respondidos mediante una investigación.",c:"Formular y fundamentar hipótesis comprobables basándose en conocimiento científico.",d:"Planificar diseños experimentales que respondan a una pregunta, con instrumentos confiables, control de variables y procedimientos replicables.",e:"Planificar investigaciones no experimentales o documentales a partir de diversas fuentes.",f:"Conducir investigaciones de forma rigurosa, con apoyo de TIC, para obtener evidencia precisa y confiable.",g:"Organizar el trabajo colaborativo asignando roles, comunicándose de forma efectiva y siguiendo normas de seguridad.",h:"Organizar y presentar datos con precisión en tablas, gráficos o modelos, justificando su confiabilidad.",i:"Crear, seleccionar, usar y ajustar modelos para describir mecanismos y explicar relaciones dentro de un sistema.",j:"Analizar resultados para elaborar inferencias y conclusiones, comparando tendencias y usando vocabulario científico.",k:"Evaluar investigaciones científicas considerando validez, confiabilidad, replicabilidad y desempeño propio y del grupo.",l:"Explicar y argumentar con evidencia, de forma oral y escrita, usando tablas, gráficos, modelos y TIC.",m:"Discutir diseños de investigación, teorías, predicciones y conclusiones con argumentos basados en evidencia."};
+const CN_OAHS={a:"Observar",b:"Plantear preguntas",c:"Formular hipótesis",d:"Diseño experimental",e:"Investigación documental",f:"Conducir investigaciones",g:"Trabajo colaborativo",h:"Organizar datos",i:"Usar modelos",j:"Analizar resultados",k:"Evaluar investigaciones",l:"Explicar y argumentar",m:"Discutir con evidencia"};
+const CN_OAA={A:["Mostrar curiosidad, creatividad e interés por conocer y comprender los fenómenos naturales y tecnológicos, valorando el aporte de la ciencia.","se promueve al plantear preguntas sobre fenómenos cotidianos y explorar posibles explicaciones."],B:["Esforzarse y perseverar en el trabajo personal, entendiendo que el rigor, la precisión y el orden permiten obtener datos confiables.","se promueve al registrar datos con precisión y repetir procedimientos cuando es necesario."],C:["Trabajar responsable y colaborativamente, respetando los aportes del equipo y los argumentos de otros.","se promueve al asignar roles en el equipo y considerar los aportes de cada integrante."],D:["Pensar con rigor y de manera crítica, buscando evidencia que sustente respuestas, soluciones e hipótesis.","se promueve al exigir evidencia para cada afirmación y cuestionar conclusiones sin respaldo."],E:["Usar de manera responsable las tecnologías de la comunicación, dando crédito al trabajo de otros.","se promueve al citar las fuentes consultadas y usar la tecnología de forma ética."],F:["Valorar y proteger la salud y la seguridad, y considerar las implicancias éticas de la ciencia y la tecnología.","se promueve al respetar las normas de seguridad del laboratorio y discutir implicancias éticas."],G:["Valorar el entorno natural y usar los recursos de forma eficiente y responsable para la sustentabilidad.","se promueve al relacionar los contenidos con el cuidado del medio ambiente y el uso eficiente de recursos."],H:["Valorar los aportes de mujeres y hombres a la ciencia y reconocer que el conocimiento científico se construye en el tiempo.","se promueve al conocer el trabajo de científicas y científicos, incluidos los chilenos."]};
+const CN_OAAS={A:"Curiosidad científica",B:"Rigor y perseverancia",C:"Trabajo colaborativo",D:"Pensamiento crítico",E:"Uso responsable de TIC",F:"Salud y seguridad",G:"Medio ambiente",H:"Aportes a la ciencia"};
+const CN_RES={a:"Muestras, imágenes o videos para observar",b:"Guía de preguntas",c:"Pauta de formulación de hipótesis",d:"Materiales de laboratorio y pauta de diseño experimental",e:"Fuentes documentales y pauta de investigación",f:"Materiales de laboratorio y elementos de seguridad",g:"Pauta de roles y normas de seguridad",h:"Planilla de datos y papel milimetrado o planilla de cálculo",i:"Materiales para construir modelos",j:"Guía de análisis de resultados",k:"Pauta de evaluación de investigaciones",l:"Pauta de informe o presentación",m:"Pauta de discusión"};
 
+const BIO={
+ area:"Ciencias Naturales · Biología",level:"1° Medio",file:"Biologia_1M",unitWord:"Unidad",hab:"Habilidades de investigación científica",eje:()=>"Biología",
+ units:[
+ {id:1,name:"Evolución y biodiversidad",weeks:8,oas:[1,2,3],prop:"Que los estudiantes comprendan, a partir de evidencias, que la diversidad de seres vivos es resultado de la evolución, y cómo se construyen los sistemas de clasificación."},
+ {id:2,name:"Organismos en ecosistemas",weeks:6,oas:[4,5],prop:"Que los estudiantes expliquen cómo se organizan e interactúan los seres vivos en ecosistemas chilenos y analicen los factores que afectan a las poblaciones."},
+ {id:3,name:"Materia y energía en ecosistemas",weeks:6,oas:[6,7],prop:"Que los estudiantes modelen el flujo de energía y los ciclos de la materia en los ecosistemas, incluido el rol de la fotosíntesis y la respiración celular."},
+ {id:4,name:"Impactos en ecosistemas y sustentabilidad",weeks:4,oas:[8],prop:"Que los estudiantes evalúen los efectos de actividades humanas y fenómenos naturales en los ecosistemas y propongan acciones para el desarrollo sustentable."}],
+ OA:{
+1:{t:"Explicar, basándose en evidencias, que los fósiles se forman a partir de restos de animales y plantas, que se encuentran principalmente en rocas sedimentarias y que pueden ordenarse según su antigüedad en los estratos de la Tierra.",k:"la formación de fósiles y su datación relativa",c:["fósil","rocas sedimentarias","estratos","datación relativa"],
+ f:[["Explicar","el proceso de fosilización","¿Por qué no todos los seres vivos se convierten en fósiles?"],["Relacionar","los fósiles con las rocas sedimentarias","¿Por qué la mayoría de los fósiles se encuentran en rocas sedimentarias?"],["Interpretar","los estratos para ordenar fósiles según su antigüedad","¿Cómo sabemos qué fósil es más antiguo sin conocer su edad exacta?"]],
+ i:["Describen el proceso de formación de fósiles y sus tipos (moldes, impresiones, restos mineralizados).","Explican por qué los fósiles se encuentran principalmente en rocas sedimentarias.","Ordenan fósiles según su antigüedad relativa a partir de la posición de los estratos.","Argumentan, con evidencia, el valor del registro fósil para reconstruir la historia de la vida."],
+ a:[["Modelo de fosilización","la simulación de un proceso de fosilización","En grupos simulan la formación de moldes e impresiones con yeso o plasticina y conchas u hojas; registran cada etapa y la comparan con el proceso natural.","i"],["Columna estratigráfica","la interpretación de columnas estratigráficas","Analizan una columna estratigráfica con fósiles índice y ordenan los eventos según la ley de superposición; responden preguntas de inferencia.","j"],["Fósiles de Chile","una investigación documental","Investigan fósiles encontrados en Chile (Atacama, Patagonia) y presentan su antigüedad, el ambiente en que vivieron y su relevancia.","e"]],aa:["A","H"]},
+2:{t:"Analizar e interpretar datos para proveer evidencias que apoyen que la diversidad de organismos es el resultado de la evolución, considerando el registro fósil, las estructuras anatómicas homólogas, la embriología y las secuencias de ADN, y los aportes de Darwin y Wallace a la teoría de la selección natural.",k:"la evolución y la selección natural",c:["evolución","selección natural","homología","embriología comparada","ADN"],
+ f:[["Analizar","las evidencias de la evolución (fósiles, homologías, embriología y ADN)","¿Qué pruebas tenemos de que las especies cambian en el tiempo?"],["Explicar","la teoría de la selección natural de Darwin y Wallace","¿Por qué algunos individuos sobreviven y se reproducen más que otros?"],["Comparar","secuencias de ADN y estructuras homólogas para inferir parentesco","¿Qué tan emparentados estamos con otras especies?"]],
+ i:["Describen las principales evidencias de la evolución: registro fósil, estructuras homólogas, embriología comparada y secuencias de ADN.","Explican el mecanismo de selección natural considerando variabilidad, herencia y reproducción diferencial.","Interpretan datos (secuencias, imágenes de estructuras) para inferir relaciones evolutivas.","Evalúan los aportes de Darwin y Wallace en el contexto científico de su época."],
+ a:[["Simulación de selección natural","una simulación de depredación","Simulan la selección natural con «presas» de distintos colores sobre fondos diferentes; registran datos por generación, los grafican y explican los resultados.","h"],["Evidencias en estaciones","el análisis de evidencias en estaciones","Rotan por estaciones con fósiles, extremidades homólogas, embriones comparados y secuencias de ADN; completan una tabla de evidencias.","j"],["Darwin y Wallace","el análisis de textos históricos","Leen fragmentos de los trabajos de Darwin y Wallace y comparan sus observaciones y conclusiones.","m"]],aa:["D","H"]},
+3:{t:"Explicar, basándose en evidencias, que la clasificación de los organismos se construye a partir de criterios taxonómicos que cambian en el tiempo y que permiten establecer relaciones de parentesco mediante ancestros comunes.",k:"la clasificación de los seres vivos",c:["taxonomía","especie","cladograma","ancestro común","dominios"],
+ f:[["Explicar","los criterios taxonómicos y las categorías de clasificación","¿Para qué clasificamos a los seres vivos?"],["Analizar","los cambios históricos en los sistemas de clasificación","¿Por qué los sistemas de clasificación han cambiado con el tiempo?"],["Interpretar","cladogramas para establecer relaciones de parentesco","¿Cómo se representa el parentesco entre especies?"]],
+ i:["Describen las categorías taxonómicas y el sistema de nomenclatura binomial.","Explican cómo han cambiado los criterios de clasificación (de Linneo a los tres dominios).","Construyen e interpretan cladogramas a partir de caracteres compartidos.","Argumentan que la clasificación refleja relaciones evolutivas y ancestros comunes."],
+ a:[["Clasificar lo cotidiano","la construcción de claves dicotómicas","Diseñan una clave dicotómica para clasificar organismos de su entorno y la ponen a prueba con otro grupo.","h"],["Cladograma de vertebrados","la construcción de un cladograma","Construyen un cladograma de vertebrados a partir de una matriz de caracteres y lo interpretan.","i"],["Historia de la taxonomía","una investigación documental","Investigan los aportes de Aristóteles, Linneo, Haeckel, Whittaker y Woese y construyen una línea de tiempo.","e"]],aa:["D","A"]},
+4:{t:"Investigar y explicar cómo se organizan e interactúan los seres vivos en diversos ecosistemas, a partir de ejemplos de Chile, considerando los niveles de organización (organismo, población, comunidad, ecosistema) y las interacciones biológicas (depredación, competencia, comensalismo, mutualismo y parasitismo).",k:"la organización e interacciones en los ecosistemas",c:["población","comunidad","ecosistema","interacciones biológicas","nicho"],
+ f:[["Describir","los niveles de organización de los seres vivos en ecosistemas chilenos","¿Cómo se organiza la vida en un ecosistema?"],["Explicar","las interacciones biológicas entre especies","¿Todas las relaciones entre especies son de competencia?"],["Investigar","las interacciones en un ecosistema local","¿Qué interacciones podemos observar en nuestro entorno?"]],
+ i:["Distinguen los niveles de organización: organismo, población, comunidad y ecosistema.","Explican interacciones biológicas (depredación, competencia, comensalismo, mutualismo, parasitismo) con ejemplos de Chile.","Clasifican interacciones según su efecto (+, −, 0) sobre las especies involucradas.","Comunican con evidencia los resultados de una investigación sobre interacciones en un ecosistema local."],
+ a:[["Salida de observación","una observación en terreno","Observan un ecosistema cercano (patio, plaza, humedal), registran organismos e interacciones en una bitácora y las clasifican.","a"],["Tarjetas de interacciones","el análisis de casos de ecosistemas chilenos","Analizan casos (picaflor y flores, chinita y pulgones, quintral, castor en Tierra del Fuego) y clasifican cada interacción.","j"],["Infografía de ecosistema","la elaboración de una infografía","Elaboran una infografía de un ecosistema chileno con sus niveles de organización e interacciones.","l"]],aa:["G","C"]},
+5:{t:"Analizar e interpretar factores que afectan el tamaño de las poblaciones (propagación de enfermedades, disponibilidad de energía y recursos alimentarios, sequías, entre otros) y predecir posibles consecuencias sobre el ecosistema.",k:"los factores que afectan el tamaño de las poblaciones",c:["población","densidad","capacidad de carga","factores limitantes","curvas de crecimiento"],
+ f:[["Analizar","los factores que regulan el tamaño de las poblaciones","¿Por qué una población no puede crecer indefinidamente?"],["Interpretar","curvas de crecimiento poblacional","¿Qué nos dice la forma de una curva de crecimiento?"],["Predecir","las consecuencias de cambios poblacionales en el ecosistema","¿Qué ocurre en el ecosistema si desaparece una población?"]],
+ i:["Identifican factores bióticos y abióticos que afectan el tamaño de las poblaciones.","Interpretan gráficos de crecimiento poblacional (exponencial y logístico) y la capacidad de carga.","Predicen efectos de cambios en una población sobre otras poblaciones del ecosistema.","Evalúan situaciones reales de Chile (sequía, plagas, especies invasoras) usando datos."],
+ a:[["Gráficos de poblaciones","el análisis de datos poblacionales","Grafican datos de poblaciones (liebre y lince, conejo europeo en Chile) e interpretan tendencias y capacidad de carga.","h"],["Experimento con levaduras","un experimento con levaduras","Diseñan un experimento para evaluar cómo la cantidad de azúcar afecta el crecimiento de levaduras, controlando variables.","d"],["Casos de Chile","el estudio de casos","Analizan casos de sequía y de especies invasoras en Chile y predicen consecuencias en el ecosistema.","j"]],aa:["D","G"]},
+6:{t:"Desarrollar modelos que expliquen los ciclos del carbono, el nitrógeno, el agua y el fósforo, el flujo de la energía en tramas y pirámides tróficas, y la bioacumulación de contaminantes.",k:"los ciclos biogeoquímicos y el flujo de energía",c:["ciclo biogeoquímico","trama trófica","pirámide trófica","productores","bioacumulación"],
+ f:[["Modelar","los ciclos del carbono, nitrógeno, agua y fósforo","¿Por qué la materia se recicla y la energía no?"],["Explicar","el flujo de energía en tramas y pirámides tróficas","¿Por qué hay menos depredadores que herbívoros en un ecosistema?"],["Analizar","la bioacumulación de contaminantes en las tramas tróficas","¿Cómo llega un contaminante del agua a nuestro plato?"]],
+ i:["Representan con modelos los ciclos del carbono, nitrógeno, agua y fósforo.","Explican el flujo de energía en tramas y pirámides tróficas (regla del 10 %).","Interpretan datos de concentración de contaminantes en distintos niveles tróficos.","Evalúan las limitaciones de los modelos utilizados para representar los ciclos."],
+ a:[["Ciclos en movimiento","la construcción de modelos de ciclos","En grupos construyen un modelo físico o digital de un ciclo biogeoquímico y lo explican al curso.","i"],["Pirámide de energía","el cálculo de transferencia de energía","Calculan la energía disponible en cada nivel trófico a partir de datos y construyen pirámides de energía y biomasa.","h"],["Bioacumulación en datos","el análisis de datos de contaminantes","Analizan datos de mercurio o DDT en distintos niveles tróficos y explican la bioacumulación.","j"]],aa:["G","D"]},
+7:{t:"Explicar, por medio de una investigación, el rol de la fotosíntesis y la respiración celular en el ecosistema, considerando el flujo de la energía y el ciclo de la materia.",k:"la fotosíntesis y la respiración celular en el ecosistema",c:["fotosíntesis","respiración celular","cloroplasto","mitocondria","glucosa"],
+ f:[["Explicar","la fotosíntesis como proceso de transformación de energía","¿De dónde obtiene una planta la materia para crecer?"],["Explicar","la respiración celular y su relación con la fotosíntesis","¿Por qué las plantas también respiran?"],["Investigar","los factores que afectan la tasa de fotosíntesis","¿Cómo influye la luz en la fotosíntesis?"]],
+ i:["Describen reactantes, productos y organelos de la fotosíntesis y de la respiración celular.","Explican la relación entre fotosíntesis y respiración en el flujo de energía y el ciclo de la materia.","Diseñan y realizan una investigación sobre factores que afectan la fotosíntesis.","Analizan resultados experimentales y elaboran conclusiones con evidencia."],
+ a:[["Elodea y la luz","un experimento","Miden la producción de burbujas de oxígeno en Elodea a distintas intensidades de luz, registran los datos y los grafican.","f"],["Modelo de dos procesos","la construcción de un modelo","Construyen un modelo que relacione fotosíntesis y respiración celular (ecuaciones, organelos y energía).","i"],["Informe científico","la redacción de un informe","Redactan un informe del experimento con hipótesis, procedimiento, resultados y conclusiones.","l"]],aa:["B","A"]},
+8:{t:"Explicar y evaluar los efectos de actividades humanas (conservación, agricultura, forestación, deforestación) y de fenómenos naturales (sequías, erupciones volcánicas) sobre el equilibrio de los ecosistemas, los recursos renovables y no renovables y el desarrollo sustentable.",k:"los impactos humanos y naturales en los ecosistemas",c:["equilibrio ecológico","recursos naturales","sustentabilidad","deforestación","conservación"],
+ f:[["Explicar","los efectos de actividades humanas en los ecosistemas","¿Podemos producir alimentos sin dañar los ecosistemas?"],["Analizar","los efectos de fenómenos naturales en los ecosistemas","¿Cómo se recupera un ecosistema después de una erupción?"],["Evaluar","medidas de conservación y desarrollo sustentable","¿Qué medidas de conservación son más efectivas?"]],
+ i:["Describen efectos de actividades humanas sobre los ecosistemas chilenos.","Explican los efectos de fenómenos naturales (sequías, erupciones) en el equilibrio ecológico.","Distinguen recursos renovables y no renovables y su uso sustentable.","Evalúan medidas de conservación y proponen acciones fundamentadas."],
+ a:[["Casos ambientales de Chile","el estudio de casos","Analizan casos (monocultivo forestal, sequía en la zona central, erupción del Chaitén) e identifican efectos en el ecosistema.","j"],["Foro de sustentabilidad","un foro de discusión","Debaten propuestas de manejo sustentable representando a distintos actores.","m"],["Proyecto de conservación","un proyecto escolar","Diseñan una propuesta de conservación para un ecosistema local con indicadores de seguimiento.","e"]],aa:["G","F"]}
+ },
+ oah:CN_OAH,oahs:CN_OAHS,oaa:CN_OAA,oaas:CN_OAAS,res:CN_RES
+};
+
+const QUIM={
+ area:"Ciencias Naturales · Química",level:"1° Medio",file:"Quimica_1M",unitWord:"Unidad",hab:"Habilidades de investigación científica",eje:()=>"Química",
+ units:[
+ {id:1,name:"Reacciones químicas cotidianas y formación de compuestos",weeks:8,oas:[17,19],prop:"Que los estudiantes investiguen reacciones químicas cotidianas, los factores que las afectan y su representación, y expliquen la formación y nomenclatura de compuestos inorgánicos."},
+ {id:2,name:"Conservación de la materia y estequiometría",weeks:8,oas:[18,20],prop:"Que los estudiantes comprendan la conservación de la materia en las reacciones químicas y establezcan relaciones cuantitativas entre reactantes y productos."}],
+ OA:{
+17:{t:"Investigar experimentalmente y explicar, basándose en evidencias, el cambio químico en reacciones cotidianas (fermentación, combustión, oxidación de metales), considerando los factores que las afectan, su representación mediante ecuaciones químicas y su impacto en los seres vivos y el ambiente.",k:"las reacciones químicas cotidianas",c:["reacción química","reactantes","productos","ecuación química","velocidad de reacción"],
+ f:[["Distinguir","cambios físicos y cambios químicos en situaciones cotidianas","¿Cómo sabemos que ocurrió una reacción química?"],["Investigar","los factores que afectan la velocidad de una reacción","¿Por qué los alimentos duran más en el refrigerador?"],["Representar","reacciones cotidianas mediante ecuaciones químicas","¿Cómo se escribe lo que ocurre en una combustión?"]],
+ i:["Identifican evidencias de cambio químico (desprendimiento de gas, cambio de color o temperatura, formación de precipitado).","Explican el efecto de la temperatura, la concentración, la superficie de contacto y los catalizadores en la velocidad de reacción.","Representan reacciones cotidianas mediante ecuaciones químicas.","Evalúan el impacto de reacciones como la combustión y la oxidación en los seres vivos y el ambiente."],
+ a:[["Laboratorio de evidencias","un trabajo práctico de laboratorio","Realizan reacciones sencillas (bicarbonato con vinagre, combustión de una vela, oxidación de virutilla) y registran las evidencias de cambio químico.","f"],["¿Qué acelera una reacción?","un diseño experimental","Diseñan un experimento con tabletas efervescentes variando la temperatura o el tamaño de partícula, controlan variables y grafican resultados.","d"],["Química en mi casa","el análisis de reacciones cotidianas","Analizan reacciones del hogar (fermentación del pan, oxidación de frutas) y las representan con ecuaciones químicas.","l"]],aa:["A","F"]},
+18:{t:"Desarrollar un modelo que demuestre que en una reacción química se conservan la cantidad de átomos y la masa, a partir de la ley de conservación de la materia.",k:"la ley de conservación de la materia",c:["conservación de la masa","Lavoisier","balanceo","coeficiente estequiométrico","sistema cerrado"],
+ f:[["Comprobar","experimentalmente la conservación de la masa en una reacción","¿Desaparece la materia cuando algo se quema?"],["Modelar","el reordenamiento de átomos en una reacción química","¿Qué les pasa a los átomos durante una reacción?"],["Aplicar","el balanceo de ecuaciones químicas","¿Por qué una ecuación química debe estar balanceada?"]],
+ i:["Comprueban experimentalmente que la masa se conserva en un sistema cerrado.","Representan con modelos el reordenamiento de átomos en una reacción química.","Balancean ecuaciones químicas por tanteo.","Argumentan la importancia de la ley de Lavoisier usando evidencia experimental."],
+ a:[["Globo y botella","un experimento en sistema cerrado","Masan una botella con vinagre y un globo con bicarbonato antes y después de la reacción, y comparan un sistema abierto con uno cerrado.","f"],["Átomos de plasticina","la construcción de modelos moleculares","Representan reactantes y productos con plasticina o kits moleculares y verifican la conservación de los átomos.","i"],["Balanceo en desafío","la resolución de ejercicios","Resuelven ejercicios de balanceo en parejas con dificultad creciente y los verifican con el modelo.","j"]],aa:["B","D"]},
+19:{t:"Explicar la formación de compuestos binarios y ternarios considerando las fuerzas eléctricas entre partículas y la nomenclatura inorgánica correspondiente.",k:"la formación y nomenclatura de compuestos inorgánicos",c:["compuesto binario","compuesto ternario","enlace químico","número de oxidación","nomenclatura"],
+ f:[["Explicar","la formación de compuestos a partir de fuerzas eléctricas entre partículas","¿Por qué se unen los átomos?"],["Aplicar","la nomenclatura de compuestos binarios (óxidos, hidruros, sales binarias)","¿Cómo se nombra un compuesto?"],["Aplicar","la nomenclatura de compuestos ternarios (hidróxidos, oxácidos, oxisales)","¿Qué compuestos ternarios usamos a diario?"]],
+ i:["Explican la formación de compuestos mediante fuerzas eléctricas entre partículas.","Determinan números de oxidación para escribir fórmulas químicas.","Nombran y formulan compuestos binarios y ternarios según la nomenclatura inorgánica.","Evalúan el uso y el impacto de compuestos inorgánicos presentes en la vida cotidiana."],
+ a:[["Cartas de iones","un juego de formulación","Combinan cartas de cationes y aniones para formar compuestos neutros, escriben su fórmula y la nombran.","i"],["Etiquetas químicas","el análisis de etiquetas de productos","Analizan etiquetas de productos de uso cotidiano, identifican compuestos inorgánicos y los clasifican.","a"],["Mapa de nomenclatura","la construcción de un organizador","Construyen un organizador con las reglas de nomenclatura y ejemplos para cada familia de compuestos.","h"]],aa:["D","E"]},
+20:{t:"Establecer relaciones cuantitativas entre reactantes y productos en reacciones químicas (estequiometría) y explicar la formación de compuestos útiles para los seres vivos, como la glucosa en la fotosíntesis.",k:"la estequiometría",c:["mol","masa molar","estequiometría","reactivo limitante","rendimiento"],
+ f:[["Aplicar","el concepto de mol y masa molar","¿Cómo contamos partículas que no podemos ver?"],["Calcular","relaciones cuantitativas entre reactantes y productos","¿Cuánto producto se obtiene de una cantidad de reactante?"],["Explicar","la formación de compuestos útiles, como la glucosa en la fotosíntesis","¿Cuánta glucosa produce una planta a partir del CO₂?"]],
+ i:["Calculan masas molares y cantidades de sustancia (mol).","Establecen relaciones estequiométricas a partir de ecuaciones balanceadas.","Identifican el reactivo limitante y calculan el rendimiento de una reacción.","Evalúan la aplicación de la estequiometría en procesos biológicos e industriales, como la fotosíntesis."],
+ a:[["El mol en la cocina","el uso de analogías y mediciones","Masan cantidades de sal, azúcar o arroz para calcular moles y número de partículas.","h"],["Receta estequiométrica","la resolución de problemas","Resuelven problemas de estequiometría primero con analogías (receta de sándwiches) y luego con ecuaciones reales.","j"],["Rendimiento en laboratorio","un trabajo práctico","Realizan una reacción con cantidades medidas, calculan el rendimiento teórico y real, y discuten las diferencias.","k"]],aa:["B","G"]}
+ },
+ oah:CN_OAH,oahs:CN_OAHS,oaa:CN_OAA,oaas:CN_OAAS,res:CN_RES
+};
+
+const LEN={
+ area:"Lengua y Literatura",level:"8° Básico",file:"Lenguaje_8B",unitWord:"Eje",hab:"Habilidades (organizadas por eje)",eje:n=>LEN.units.find(u=>u.oas.includes(n)).name,
+ units:[
+ {id:1,name:"Lectura",weeks:16,oas:[1,2,3,4,5,6,7,8,9,10,11,12],prop:"Que los estudiantes lean, analicen e interpreten textos literarios y no literarios, desarrollando el hábito lector y el pensamiento crítico."},
+ {id:2,name:"Escritura",weeks:10,oas:[13,14,15,16,17,18,19,20],prop:"Que los estudiantes escriban textos creativos, expositivos y persuasivos mediante un proceso de planificación, revisión y edición, con corrección gramatical y ortográfica."},
+ {id:3,name:"Comunicación oral",weeks:6,oas:[21,22,23,24],prop:"Que los estudiantes comprendan textos orales y audiovisuales, dialoguen y expongan de forma clara, adecuada y respetuosa."},
+ {id:4,name:"Investigación sobre lengua y literatura",weeks:4,oas:[25,26],prop:"Que los estudiantes investiguen, sinteticen y comuniquen información sobre temas de lenguaje y literatura, evaluando sus fuentes."}],
+ OA:{
+1:{t:"Leer habitualmente para aprender y recrearse, y seleccionar textos de acuerdo con sus preferencias y propósitos.",k:"la lectura habitual y la selección de textos",c:["hábito lector","preferencias lectoras","propósito de lectura","plan lector"],
+ f:[["Seleccionar","textos según sus preferencias y propósitos de lectura","¿Qué hace que un libro valga la pena?"],["Compartir","experiencias de lectura con sus pares","¿Cómo le recomendarías un libro a alguien?"],["Reflexionar","sobre sus hábitos y trayectoria lectora","¿Qué tipo de lector o lectora eres?"]],
+ i:["Seleccionan textos considerando sus intereses y propósitos.","Leen de manera autónoma durante los tiempos acordados.","Recomiendan lecturas fundamentando su opinión.","Evalúan su trayectoria lectora y proponen metas personales de lectura."],
+ a:[["Feria de libros","una feria de recomendaciones","Exploran una selección de libros, leen fragmentos y eligen uno para su lectura personal, justificando su elección.","a"],["Booktalk","una recomendación oral","Presentan en dos minutos un libro leído, destacando su tema y por qué lo recomiendan.","f"],["Bitácora lectora","el registro de una bitácora","Registran en una bitácora sus lecturas, impresiones y preguntas, y comparten una entrada con un compañero.","h"]],aa:["A","G"]},
+2:{t:"Reflexionar sobre las diferentes dimensiones de la experiencia humana, propia y ajena, a partir de la lectura de obras literarias y otros textos que forman parte de nuestras herencias culturales.",k:"la experiencia humana en la literatura",c:["experiencia humana","herencia cultural","tema","visión de mundo"],
+ f:[["Reflexionar","sobre dimensiones de la experiencia humana presentes en obras literarias","¿Qué nos enseñan los personajes sobre nosotros mismos?"],["Relacionar","las obras leídas con experiencias propias y de otros","¿En qué se parece la vida de un personaje a la nuestra?"],["Valorar","textos de distintas herencias culturales","¿Por qué seguimos leyendo obras escritas hace siglos?"]],
+ i:["Identifican temas de la experiencia humana en las obras leídas (amor, libertad, heroísmo, muerte).","Relacionan situaciones de las obras con experiencias propias o de su entorno.","Comparan cómo distintas culturas abordan una misma experiencia humana.","Expresan reflexiones personales fundamentadas en el texto."],
+ a:[["Círculo literario","un círculo de lectura","En grupos con roles (conector, interrogador, ilustrador, buscador de citas) discuten un cuento o capítulo.","g"],["Diario del personaje","la escritura de un diario","Escriben una entrada de diario desde la perspectiva de un personaje frente a un dilema.","d"],["Mural de temas","la elaboración de un mural","Elaboran un mural que relacione las obras leídas con temas humanos y citas relevantes.","b"]],aa:["B","C"]},
+3:{t:"Analizar las narraciones leídas para enriquecer su comprensión, considerando el conflicto, los personajes y sus relaciones, el narrador, los personajes tipo, los símbolos y tópicos, los prejuicios y estereotipos, el orden temporal de los hechos y la relación con otros textos.",k:"el análisis de narraciones",c:["conflicto","narrador","personaje tipo","símbolo","tiempo narrativo"],
+ f:[["Analizar","el conflicto y las relaciones entre personajes","¿Qué mueve a los personajes a actuar?"],["Analizar","el narrador y el orden temporal de los hechos","¿Cómo cambiaría la historia si la contara otro?"],["Interpretar","símbolos, tópicos y estereotipos en el relato","¿Qué representa este objeto en la historia?"]],
+ i:["Explican el conflicto y cómo se relaciona con las acciones de los personajes.","Identifican el tipo de narrador y su efecto en la historia.","Reconstruyen el orden temporal de los hechos (retrospección y anticipación).","Interpretan símbolos, tópicos y estereotipos fundamentando con citas."],
+ a:[["Mapa del relato","un organizador gráfico","Completan un mapa del relato con conflicto, personajes, narrador y secuencia temporal.","a"],["Cambio de narrador","la reescritura de un fragmento","Reescriben un fragmento cambiando el tipo de narrador y analizan el efecto.","d"],["Caza de símbolos","el análisis de citas","Buscan citas que contengan símbolos o estereotipos y los interpretan en parejas.","b"]],aa:["A","D"]},
+4:{t:"Analizar los poemas leídos, considerando el lenguaje que apela a los sentidos, sugiere estados de ánimo y crea imágenes, el efecto del lenguaje figurado y de las repeticiones, y la relación con otros textos.",k:"el análisis de poemas",c:["hablante lírico","imagen sensorial","lenguaje figurado","repetición","temple de ánimo"],
+ f:[["Analizar","el lenguaje que apela a los sentidos y crea imágenes","¿Qué vemos, oímos o sentimos al leer este poema?"],["Interpretar","el efecto del lenguaje figurado y de las repeticiones","¿Por qué el poeta no lo dice directamente?"],["Relacionar","poemas con otros textos y manifestaciones artísticas","¿Qué canción se parece a este poema?"]],
+ i:["Identifican imágenes sensoriales y el estado de ánimo que sugieren.","Explican el efecto de figuras literarias (metáfora, comparación, personificación, hipérbole).","Analizan el efecto de las repeticiones (anáfora, rima, estribillo).","Evalúan la relación del poema con otros textos o expresiones artísticas."],
+ a:[["Poema en cinco sentidos","una lectura guiada","Leen poemas y registran en una tabla las imágenes asociadas a cada sentido y su efecto.","b"],["Figuras en acción","el análisis de figuras literarias","Identifican figuras literarias en poemas y canciones y explican su efecto.","b"],["Recital comentado","un recital","Leen en voz alta un poema seleccionado y comentan su interpretación ante el curso.","f"]],aa:["C","D"]},
+5:{t:"Analizar los textos dramáticos leídos o vistos, considerando el conflicto y su semejanza con situaciones cotidianas, los personajes principales y tipo, los símbolos y estereotipos, las características del género dramático, la diferencia entre obra dramática y obra teatral, y la relación con otros textos.",k:"el análisis de textos dramáticos",c:["conflicto dramático","acotación","obra dramática","obra teatral","personaje tipo"],
+ f:[["Analizar","el conflicto dramático y su relación con situaciones cotidianas","¿Qué conflicto de la obra podría ocurrir hoy?"],["Distinguir","la obra dramática de la obra teatral","¿Qué cambia entre leer una obra y verla en escena?"],["Analizar","personajes tipo, símbolos y estereotipos","¿Por qué algunos personajes nos resultan tan familiares?"]],
+ i:["Describen características del género dramático (diálogo, acotaciones, actos y escenas).","Explican el conflicto dramático y lo relacionan con situaciones cotidianas.","Distinguen la obra dramática (texto) de la obra teatral (montaje).","Evalúan la construcción de personajes tipo y estereotipos fundamentando con el texto."],
+ a:[["Lectura dramatizada","una lectura dramatizada","Leen en voz alta una escena asumiendo roles y considerando las acotaciones.","f"],["Del texto a la escena","la comparación entre texto y montaje","Comparan un fragmento escrito con su representación en video e identifican decisiones de puesta en escena.","c"],["Ficha de personaje","el análisis de personajes","Elaboran fichas de personajes con rasgos, motivaciones y relaciones, apoyadas en citas.","b"]],aa:["C","H"]},
+6:{t:"Leer y comprender fragmentos de epopeya, considerando sus características y el contexto en que se enmarcan.",k:"la epopeya",c:["epopeya","héroe épico","epíteto","in medias res","contexto de producción"],
+ f:[["Caracterizar","la epopeya y el héroe épico","¿Qué hace a alguien un héroe?"],["Relacionar","fragmentos de epopeya con su contexto de producción","¿Qué valores de su época transmite la epopeya?"],["Comparar","el héroe épico con héroes actuales","¿Cómo son los héroes de hoy?"]],
+ i:["Describen características de la epopeya (narración en verso, héroe, hazañas, intervención divina).","Relacionan los valores del héroe con el contexto histórico de la obra.","Identifican recursos propios del género (epítetos, in medias res).","Evalúan semejanzas y diferencias entre héroes épicos y héroes de la cultura actual."],
+ a:[["Héroes de ayer y hoy","un cuadro comparativo","Comparan a Ulises o Aquiles con un héroe del cine o el cómic actual.","b"],["Contexto en cápsulas","una investigación breve","Investigan el contexto de la Grecia antigua o de La Araucana y lo exponen en cápsulas breves.","h"],["Episodio ilustrado","la elaboración de un cómic","Transforman un episodio épico en un cómic de seis viñetas con citas del texto.","d"]],aa:["B","D"]},
+7:{t:"Leer y comprender comedias teatrales, considerando sus características y el contexto en que se enmarcan.",k:"la comedia teatral",c:["comedia","humor","enredo","personaje tipo","crítica social"],
+ f:[["Caracterizar","la comedia y sus recursos humorísticos","¿De qué nos reímos y por qué?"],["Analizar","la crítica social presente en las comedias","¿Qué critica esta comedia de su sociedad?"],["Relacionar","la comedia con su contexto de producción","¿Seguiría siendo graciosa esta obra hoy?"]],
+ i:["Describen características de la comedia (enredo, final feliz, personajes tipo).","Identifican recursos humorísticos (ironía, exageración, malentendidos).","Explican la crítica social presente en la obra.","Evalúan la vigencia de la comedia relacionándola con su contexto y con el presente."],
+ a:[["Escena cómica","una representación breve","Representan una escena de comedia enfatizando los recursos humorísticos.","f"],["Radiografía del humor","el análisis de recursos humorísticos","Clasifican situaciones cómicas de la obra según el recurso humorístico y explican su efecto.","b"],["Comedia actualizada","la reescritura de una escena","Adaptan una escena al presente manteniendo la crítica social.","d"]],aa:["C","H"]},
+8:{t:"Formular una interpretación de los textos literarios leídos o vistos que sea coherente con su análisis, considerando su experiencia personal, un dilema presentado en el texto y su postura personal, y la relación de la obra con la visión de mundo y el contexto histórico.",k:"la interpretación de textos literarios",c:["interpretación","dilema","postura","visión de mundo","contexto"],
+ f:[["Formular","interpretaciones coherentes con el análisis del texto","¿Qué quiso decir la obra y cómo lo sabemos?"],["Argumentar","una postura personal frente a un dilema del texto","¿Qué habrías hecho tú en el lugar del personaje?"],["Relacionar","la obra con la visión de mundo y el contexto histórico","¿Qué muestra la obra sobre la época en que se escribió?"]],
+ i:["Identifican un dilema presentado en la obra.","Formulan una interpretación sustentada en elementos del texto.","Relacionan la obra con su contexto histórico y visión de mundo.","Argumentan una postura personal frente al dilema y la contrastan con la de sus pares."],
+ a:[["Dilema en debate","un debate","Debaten un dilema planteado por la obra, fundamentando con citas.","g"],["Párrafo interpretativo","la escritura de un párrafo","Redactan un párrafo interpretativo con afirmación, evidencia del texto y explicación.","d"],["Galería de interpretaciones","una galería de aprendizaje","Exhiben interpretaciones en papelógrafos y los pares comentan con notas adhesivas.","b"]],aa:["A","F"]},
+9:{t:"Analizar y evaluar textos con finalidad argumentativa (columnas de opinión, cartas, discursos), considerando la postura del autor y sus fundamentos, la diferencia entre hecho y opinión, el uso de los modos verbales y su postura personal frente al tema.",k:"el análisis de textos argumentativos",c:["tesis","argumento","hecho","opinión","modo verbal"],
+ f:[["Identificar","la postura del autor y sus fundamentos","¿Qué defiende el autor y cómo lo hace?"],["Distinguir","hechos de opiniones en textos argumentativos","¿Cómo distinguimos un hecho de una opinión?"],["Evaluar","la solidez de los argumentos y formar una postura propia","¿Te convence este texto? ¿Por qué?"]],
+ i:["Identifican la tesis y los argumentos de un texto argumentativo.","Distinguen hechos de opiniones fundamentando su clasificación.","Explican el uso de los modos verbales para persuadir.","Evalúan la solidez de los argumentos y fundamentan una postura personal."],
+ a:[["Columna al microscopio","el análisis de columnas de opinión","Marcan con colores tesis, argumentos, hechos y opiniones en una columna y discuten su solidez.","c"],["Cartas en contraste","el análisis comparado","Comparan dos cartas al director con posturas opuestas sobre un mismo tema.","c"],["Mi postura","la escritura de una respuesta","Escriben una respuesta breve al texto leído, adhiriendo o refutando con argumentos.","d"]],aa:["A","F"]},
+10:{t:"Analizar y evaluar textos de los medios de comunicación (noticias, reportajes, cartas al director, publicidad, redes sociales), considerando propósitos explícitos e implícitos, hechos y opiniones, estereotipos, la suficiencia de la información, la relación entre imágenes y texto, y las diferencias en el tratamiento de un mismo hecho.",k:"el análisis de textos de los medios",c:["noticia","reportaje","publicidad","propósito implícito","estereotipo"],
+ f:[["Analizar","propósitos explícitos e implícitos de textos de los medios","¿Qué quiere lograr este medio con su mensaje?"],["Comparar","el tratamiento de un mismo hecho en distintos medios","¿Por qué dos medios cuentan distinto la misma noticia?"],["Evaluar","estereotipos y relación imagen-texto en publicidad y redes sociales","¿Qué estereotipos nos venden los anuncios?"]],
+ i:["Identifican propósitos explícitos e implícitos en textos de los medios.","Distinguen hechos de opiniones y analizan si la información es suficiente.","Analizan la relación entre imágenes, gráficos y texto.","Evalúan la cobertura de un mismo hecho en distintos medios."],
+ a:[["Misma noticia, dos miradas","el análisis comparado de noticias","Comparan titulares, fuentes e imágenes de un mismo hecho en dos medios.","c"],["Desarmando la publicidad","el análisis de avisos publicitarios","Analizan avisos identificando público objetivo, estereotipos y recursos persuasivos.","c"],["Verificadores","la verificación de información","Verifican una publicación de redes sociales contrastándola con fuentes confiables.","h"]],aa:["E","F"]},
+11:{t:"Leer y comprender textos no literarios para contextualizar y complementar las lecturas literarias realizadas en clases.",k:"los textos no literarios como contexto de la lectura",c:["texto informativo","contexto","intertextualidad","idea principal"],
+ f:[["Comprender","textos no literarios que contextualizan una obra","¿Qué necesitamos saber para entender mejor esta obra?"],["Relacionar","información de textos no literarios con lecturas literarias","¿Cómo cambia nuestra lectura al conocer el contexto?"],["Sintetizar","información relevante de textos informativos","¿Qué es lo más importante de este texto?"]],
+ i:["Extraen información relevante de textos no literarios.","Relacionan la información con la obra literaria leída.","Explican cómo el contexto enriquece la interpretación.","Evalúan qué información contextual es más útil para comprender la obra."],
+ a:[["Rompecabezas de contexto","un trabajo en rompecabezas","Cada grupo lee un texto informativo distinto sobre el contexto de la obra y luego lo explica a otro grupo.","a"],["Antes y después","la comparación de lecturas","Comparan su comprensión de un fragmento antes y después de leer el texto contextual.","b"],["Ficha de contexto","un organizador gráfico","Completan una ficha con autor, época, sucesos relevantes y su relación con la obra.","h"]],aa:["C","F"]},
+12:{t:"Aplicar estrategias de comprensión de acuerdo con sus propósitos de lectura: resumir, formular preguntas y analizar los distintos tipos de relaciones que establecen las imágenes o el sonido con el texto escrito en textos multimodales.",k:"las estrategias de comprensión lectora",c:["resumen","preguntas de comprensión","texto multimodal","inferencia"],
+ f:[["Aplicar","la estrategia de resumir textos","¿Cómo decir lo esencial en pocas palabras?"],["Formular","preguntas para monitorear la comprensión","¿Qué preguntas nos ayudan a entender un texto?"],["Analizar","la relación entre imagen, sonido y texto en textos multimodales","¿Qué aporta la imagen que no dice el texto?"]],
+ i:["Resumen textos conservando las ideas principales.","Formulan preguntas literales, inferenciales y críticas sobre lo leído.","Analizan la relación entre imágenes, sonido y texto en textos multimodales.","Evalúan qué estrategia de comprensión es más adecuada según su propósito."],
+ a:[["Resumen en tres niveles","la práctica de resumen","Resumen un texto en 50, 25 y 10 palabras y comparan qué información conservaron.","a"],["Pregunta al texto","la formulación de preguntas","En parejas formulan preguntas de distinto nivel y las intercambian para responderlas.","a"],["Infografía decodificada","el análisis de textos multimodales","Analizan una infografía o un video explicando la función de cada elemento visual y sonoro.","c"]],aa:["G","F"]},
+13:{t:"Expresarse en forma creativa por medio de la escritura de textos de diversos géneros, escogiendo libremente el tema, el género y el destinatario.",k:"la escritura creativa",c:["género literario","destinatario","creatividad","voz narrativa"],
+ f:[["Explorar","ideas y géneros para la escritura creativa","¿Sobre qué te gustaría escribir?"],["Escribir","un texto creativo eligiendo género y destinatario","¿Para quién escribimos?"],["Compartir","sus textos creativos con una audiencia","¿Cómo reacciona el lector a lo que escribí?"]],
+ i:["Generan ideas para escribir mediante técnicas de creatividad.","Escriben textos creativos adecuados al género elegido.","Adecuan su texto al destinatario seleccionado.","Evalúan sus textos a partir de la retroalimentación recibida y los mejoran."],
+ a:[["Detonantes creativos","un taller de escritura","Escriben a partir de detonantes (imagen, objeto, primera frase) en distintos géneros.","d"],["Taller de pares","una revisión entre pares","Intercambian textos y los comentan con la técnica «dos estrellas y un deseo».","e"],["Antología del curso","la publicación de una antología","Seleccionan, editan y publican sus mejores textos en una antología digital o impresa.","e"]],aa:["D","G"]},
+14:{t:"Escribir, con el propósito de explicar un tema, textos de diversos géneros (artículos, informes, reportajes), caracterizados por una presentación clara del tema, información de diversas fuentes, ejemplos y explicaciones, progresión temática, imágenes pertinentes, un cierre coherente y el uso de referencias.",k:"la escritura de textos expositivos",c:["texto expositivo","progresión temática","recursos anafóricos","fuentes","referencias"],
+ f:[["Planificar","un texto expositivo a partir de diversas fuentes","¿Qué necesita saber el lector sobre este tema?"],["Escribir","un texto expositivo con progresión temática y ejemplos","¿Cómo se ordena la información para explicar?"],["Citar","fuentes y referencias de manera adecuada","¿Por qué es importante citar?"]],
+ i:["Organizan la información de diversas fuentes antes de escribir.","Presentan el tema con claridad y lo desarrollan con ejemplos y explicaciones.","Mantienen la progresión temática usando recursos anafóricos.","Evalúan la pertinencia de sus fuentes e incluyen referencias en el formato acordado."],
+ a:[["Del esquema al artículo","la planificación con esquemas","Organizan información de tres fuentes en un esquema de introducción, desarrollo y cierre.","h"],["Artículo de divulgación","la escritura de un artículo","Escriben un artículo de divulgación sobre un tema vinculado a las lecturas, con imágenes pertinentes.","d"],["Taller de referencias","la práctica de citación","Practican cómo citar y registrar fuentes en el formato acordado.","e"]],aa:["F","G"]},
+15:{t:"Escribir textos breves con el propósito de persuadir (cartas al director, editoriales, críticas literarias), caracterizados por una afirmación referida a temas contingentes o literarios, la presencia de evidencias e información pertinente y la mantención de la coherencia temática.",k:"la escritura de textos persuasivos",c:["tesis","evidencia","carta al director","crítica literaria","coherencia"],
+ f:[["Formular","una afirmación clara sobre un tema contingente o literario","¿Qué opinas y por qué debería importarle al lector?"],["Fundamentar","una postura con evidencias pertinentes","¿Qué pruebas respaldan tu opinión?"],["Escribir","una carta al director o una crítica literaria","¿Cómo convencer en pocas líneas?"]],
+ i:["Formulan una afirmación clara sobre un tema.","Apoyan su postura con evidencias e información pertinentes.","Mantienen la coherencia temática en el texto.","Evalúan la eficacia persuasiva de su texto y lo ajustan al género elegido."],
+ a:[["Carta al director","la escritura de una carta","Escriben una carta al director sobre un tema de la comunidad escolar y la publican en el diario mural.","d"],["Crítica literaria","la escritura de una crítica","Escriben una crítica de una obra leída con una valoración fundamentada.","d"],["Evidencias que convencen","la selección de evidencias","Clasifican evidencias según su pertinencia para respaldar una afirmación.","c"]],aa:["E","A"]},
+16:{t:"Planificar, escribir, revisar, reescribir y editar sus textos en función del contexto, el destinatario y el propósito, considerando la organización de ideas, el registro, la coherencia y cohesión, el uso de conectores y vocabulario preciso, y la corrección gramatical y ortográfica.",k:"el proceso de escritura",c:["planificación","revisión","coherencia","cohesión","registro"],
+ f:[["Planificar","textos según contexto, destinatario y propósito","¿Qué hay que decidir antes de escribir?"],["Revisar","la coherencia, la cohesión y el uso de conectores","¿Se entiende lo que quise decir?"],["Editar","aspectos gramaticales, ortográficos y de presentación","¿Qué errores debo corregir antes de publicar?"]],
+ i:["Planifican considerando destinatario, propósito y registro.","Revisan la coherencia y cohesión de sus textos.","Usan conectores y vocabulario preciso.","Evalúan y editan sus textos corrigiendo errores gramaticales, ortográficos y de presentación."],
+ a:[["Pauta de revisión","la revisión con pauta","Revisan su borrador con una pauta de coherencia, cohesión y corrección, y marcan los cambios.","e"],["Antes y después","la reescritura de un texto","Reescriben un texto propio y explican tres mejoras realizadas.","e"],["Conectores en acción","la práctica de conectores","Mejoran un texto sin conectores eligiendo los más adecuados según la relación lógica.","d"]],aa:["G","F"]},
+17:{t:"Usar en sus textos oraciones complejas, manteniendo un referente claro, la coherencia temporal y un sujeto identificable.",k:"las oraciones complejas",c:["oración compuesta","subordinación","referente","coherencia temporal"],
+ f:[["Construir","oraciones complejas con subordinación y coordinación","¿Cómo unir ideas en una sola oración?"],["Mantener","la coherencia temporal en oraciones complejas","¿Por qué cambiar el tiempo verbal confunde al lector?"],["Revisar","que el sujeto y el referente sean identificables","¿De quién se está hablando?"]],
+ i:["Reconocen oraciones coordinadas y subordinadas.","Construyen oraciones complejas manteniendo la coherencia temporal.","Mantienen un sujeto y un referente claros.","Evalúan y corrigen oraciones ambiguas en sus textos."],
+ a:[["Unir ideas","la combinación de oraciones","Combinan oraciones simples en complejas usando distintos nexos y comparan el efecto.","d"],["Detectives de ambigüedad","la corrección de oraciones","Corrigen oraciones con referentes ambiguos o incoherencias temporales.","e"],["Mi texto mejorado","la revisión de un texto propio","Revisan un texto propio y transforman tres oraciones simples en complejas.","e"]],aa:["G","F"]},
+18:{t:"Construir textos con referencias claras, usando recursos de correferencia como deícticos, pronombres, nominalizaciones, sustituciones y elipsis, y evaluar si estos recursos generan ambigüedad o problemas de estilo.",k:"los recursos de correferencia",c:["correferencia","pronombre","deíctico","nominalización","elipsis"],
+ f:[["Identificar","recursos de correferencia en textos","¿Cómo evitamos repetir siempre la misma palabra?"],["Usar","pronombres, sustituciones y elipsis para dar cohesión","¿Qué palabra puede reemplazar a otra sin cambiar el sentido?"],["Evaluar","si los recursos de correferencia generan ambigüedad","¿Se pierde el referente en este párrafo?"]],
+ i:["Identifican recursos de correferencia en textos leídos.","Usan pronombres, sinónimos, nominalizaciones y elipsis en sus textos.","Corrigen problemas de referencia en sus propios textos.","Evalúan si el uso de correferencias produce ambigüedad o problemas de estilo."],
+ a:[["Cadena de referentes","el análisis de cadenas correferenciales","Marcan con colores las cadenas de referencia de un texto informativo.","a"],["Texto sin repeticiones","la reescritura de un párrafo","Reescriben un párrafo repetitivo usando distintos recursos de correferencia.","e"],["Clínica de ambigüedades","la corrección colaborativa","Corrigen en grupos fragmentos con referentes perdidos.","e"]],aa:["G","H"]},
+19:{t:"Conocer los modos verbales, analizar sus usos y seleccionar el más apropiado para lograr un efecto en el lector, especialmente al escribir textos con finalidad persuasiva.",k:"los modos verbales",c:["modo indicativo","modo subjuntivo","modo imperativo","persuasión"],
+ f:[["Reconocer","los modos indicativo, subjuntivo e imperativo","¿Qué diferencia hay entre «vienes», «vengas» y «ven»?"],["Analizar","el efecto de los modos verbales en textos persuasivos","¿Por qué la publicidad usa tanto el imperativo?"],["Seleccionar","el modo verbal adecuado al propósito comunicativo","¿Qué modo verbal convence más en esta situación?"]],
+ i:["Distinguen los modos indicativo, subjuntivo e imperativo.","Explican el efecto de los modos verbales en textos persuasivos.","Seleccionan el modo verbal adecuado al propósito.","Evalúan la eficacia del modo verbal elegido y corrigen errores de conjugación."],
+ a:[["Modos en publicidad","el análisis de avisos","Identifican modos verbales en eslóganes publicitarios y explican su intención.","c"],["Transformaciones","la transformación de oraciones","Transforman oraciones cambiando el modo verbal y analizan el cambio de sentido.","d"],["Eslogan propio","la escritura de eslóganes","Crean eslóganes para una campaña escolar usando intencionadamente los modos verbales.","d"]],aa:["E","G"]},
+20:{t:"Escribir correctamente para facilitar la comprensión del lector, aplicando las reglas de ortografía literal y acentual, verificando la escritura de palabras de ortografía no reglada y usando correctamente punto, coma, raya y dos puntos.",k:"la ortografía y la puntuación",c:["acentuación","ortografía literal","puntuación","raya","dos puntos"],
+ f:[["Aplicar","las reglas de acentuación general y diacrítica","¿Cambia el sentido una tilde?"],["Usar","correctamente punto, coma, raya y dos puntos","¿Cómo cambia el sentido de una oración según la puntuación?"],["Verificar","la escritura de palabras de ortografía no reglada","¿Qué hacemos cuando dudamos cómo se escribe una palabra?"]],
+ i:["Aplican las reglas de acentuación general, diacrítica y de hiatos.","Usan correctamente punto, coma, raya y dos puntos.","Verifican la ortografía de palabras no regladas usando diccionarios.","Evalúan y corrigen los errores ortográficos de sus textos."],
+ a:[["La coma que salva vidas","el análisis de ejemplos","Analizan oraciones cuyo sentido cambia según la puntuación y explican la regla.","e"],["Dictado colaborativo","un dictado en parejas","Realizan un dictado en parejas y corrigen con apoyo de las reglas.","e"],["Corrector del curso","la edición de textos","Editan un texto con errores intencionales justificando cada corrección.","e"]],aa:["G","F"]},
+21:{t:"Comprender, comparar y evaluar textos orales y audiovisuales (exposiciones, discursos, documentales, noticias, reportajes), considerando la postura, las ideas principales, el contexto, los prejuicios, hechos y opiniones, los distintos puntos de vista, la relación entre imagen, texto y sonido, y la relación con las obras leídas.",k:"la comprensión de textos orales y audiovisuales",c:["texto audiovisual","postura","punto de vista","hecho","opinión"],
+ f:[["Comprender","ideas principales y postura en textos orales y audiovisuales","¿Qué idea central defiende este discurso?"],["Comparar","puntos de vista en distintos textos audiovisuales","¿Por qué dos documentales muestran distinto el mismo tema?"],["Evaluar","la relación entre imagen, texto y sonido","¿Cómo influye la música en lo que sentimos al ver un reportaje?"]],
+ i:["Identifican ideas principales y la postura en textos orales.","Distinguen hechos de opiniones y detectan prejuicios.","Comparan distintos puntos de vista sobre un tema.","Evalúan la relación entre imagen, texto y sonido."],
+ a:[["Cine foro","un cine foro","Ven un documental breve y discuten sus ideas principales, su postura y sus recursos audiovisuales.","g"],["Escucha activa","una guía de escucha","Escuchan un discurso o pódcast y completan una guía de ideas principales, hechos y opiniones.","a"],["Dos reportajes","el análisis comparado","Comparan dos reportajes sobre un mismo tema evaluando sus puntos de vista.","c"]],aa:["A","C"]},
+22:{t:"Dialogar constructivamente para debatir o explorar ideas, manteniendo el foco, demostrando comprensión, fundamentando su postura, formulando preguntas, negociando acuerdos, reformulando ideas y respetando turnos.",k:"el diálogo constructivo",c:["diálogo","debate","postura","fundamento","acuerdo"],
+ f:[["Fundamentar","su postura en conversaciones grupales","¿Cómo defender una idea sin imponerla?"],["Formular","preguntas y reformular ideas para avanzar en la discusión","¿Qué preguntas hacen avanzar una conversación?"],["Negociar","acuerdos respetando turnos y opiniones distintas","¿Cómo llegar a acuerdos cuando pensamos distinto?"]],
+ i:["Reformulan las ideas de otros para demostrar comprensión.","Fundamentan su postura con argumentos y ejemplos.","Formulan preguntas que hacen avanzar la discusión.","Negocian acuerdos evaluando las distintas posturas y respetando turnos."],
+ a:[["Pecera socrática","una pecera socrática","Un grupo dialoga sobre un tema de la lectura mientras otro observa y registra con una pauta.","g"],["Debate formal","un debate","Debaten en equipos con fases de argumentación, réplica y conclusión.","g"],["Mesa de acuerdos","una negociación","Negocian en grupos una propuesta común para un problema del curso.","g"]],aa:["C","E"]},
+23:{t:"Expresarse frente a una audiencia de manera clara y adecuada a la situación para comunicar temas de su interés, presentando información fidedigna de una investigación previa, con progresión temática, recapitulaciones, vocabulario preciso, conectores y material visual pertinente.",k:"la exposición oral",c:["exposición","audiencia","progresión temática","apoyo visual","muletillas"],
+ f:[["Planificar","una exposición oral a partir de una investigación","¿Qué debe saber la audiencia al final?"],["Usar","material visual y conectores en una exposición","¿Cómo ayuda el apoyo visual a entender?"],["Exponer","ante una audiencia con vocabulario preciso","¿Cómo captar y mantener la atención?"]],
+ i:["Organizan la exposición con introducción, desarrollo y cierre.","Presentan información fidedigna obtenida de una investigación.","Usan material visual pertinente y conectores.","Evalúan su desempeño oral (vocabulario preciso, ausencia de muletillas) y proponen mejoras."],
+ a:[["Guion de exposición","la planificación de un guion","Elaboran el guion de su exposición con ideas clave, conectores y recapitulaciones.","f"],["Ensayo con retroalimentación","un ensayo en grupos","Ensayan su exposición en grupos pequeños y reciben retroalimentación con una pauta.","f"],["Exposición final","una exposición oral","Exponen ante el curso con apoyo visual y responden preguntas.","f"]],aa:["E","G"]},
+24:{t:"Usar conscientemente los elementos que influyen y configuran los textos orales: diferencias con la escritura, adecuación del registro, cuidado de la relación con el interlocutor al manifestar desacuerdo, y uso adecuado del volumen, la velocidad y la dicción.",k:"los elementos de la comunicación oral",c:["registro formal","registro informal","elementos paraverbales","elementos no verbales"],
+ f:[["Distinguir","diferencias entre textos orales y escritos","¿Hablamos igual que escribimos?"],["Adecuar","el registro a la situación comunicativa","¿Cómo cambia nuestra forma de hablar según con quién hablamos?"],["Usar","elementos paraverbales y no verbales","¿Qué comunica nuestro tono de voz?"]],
+ i:["Distinguen características de los textos orales y escritos.","Adecuan el registro a la situación y al interlocutor.","Manifiestan desacuerdo cuidando la relación con el otro.","Evalúan su volumen, velocidad y dicción al hablar y proponen ajustes."],
+ a:[["Situaciones de habla","un juego de roles","Representan situaciones comunicativas que requieren distintos registros y analizan su adecuación.","f"],["Desacuerdo respetuoso","la práctica de fórmulas de cortesía","Practican fórmulas para expresar desacuerdo respetuosamente en conversaciones guiadas.","g"],["Grabo y mejoro","la autoevaluación oral","Graban una intervención oral breve y la autoevalúan con una pauta de volumen, velocidad y dicción.","f"]],aa:["C","H"]},
+25:{t:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o responder preguntas sobre el lenguaje y la literatura, delimitando el tema, evaluando la confiabilidad de las fuentes, organizando y categorizando la información, registrando datos bibliográficos y comunicando los resultados en un texto oral o escrito.",k:"la investigación sobre lengua y literatura",c:["pregunta de investigación","fuente confiable","organizador","bibliografía"],
+ f:[["Delimitar","un tema y una pregunta de investigación","¿Qué queremos averiguar exactamente?"],["Evaluar","la confiabilidad y pertinencia de las fuentes","¿Podemos confiar en esta página web?"],["Comunicar","los resultados de una investigación","¿Cómo presentar lo que descubrimos?"]],
+ i:["Delimitan el tema y formulan una pregunta de investigación.","Organizan y categorizan la información con organizadores gráficos.","Comunican los resultados registrando las referencias.","Evalúan la confiabilidad y suficiencia de las fuentes consultadas."],
+ a:[["Pregunta precisa","la delimitación de temas","Transforman temas amplios en preguntas de investigación precisas.","h"],["Semáforo de fuentes","la evaluación de fuentes","Evalúan sitios web con criterios de autoría, actualidad y propósito.","h"],["Informe de investigación","un informe breve","Elaboran un informe o póster con sus hallazgos y la bibliografía.","h"]],aa:["F","H"]},
+26:{t:"Sintetizar, registrar y ordenar las ideas principales de textos escuchados o leídos para satisfacer propósitos como estudiar, hacer una investigación o recordar detalles.",k:"la síntesis y registro de información",c:["síntesis","toma de apuntes","idea principal","organizador gráfico"],
+ f:[["Identificar","las ideas principales de textos leídos o escuchados","¿Qué es lo esencial de este texto?"],["Registrar","información mediante apuntes y organizadores","¿Cómo tomar apuntes útiles?"],["Ordenar","ideas para estudiar o investigar","¿Cómo organizar lo aprendido para recordarlo?"]],
+ i:["Identifican las ideas principales de textos leídos o escuchados.","Toman apuntes de forma organizada (método Cornell u otros).","Elaboran organizadores gráficos que sintetizan información.","Evalúan la utilidad de sus síntesis para estudiar o investigar y las mejoran."],
+ a:[["Método Cornell","la toma de apuntes","Toman apuntes con el método Cornell durante una exposición breve y los comparan.","h"],["Mapa conceptual","un mapa conceptual","Construyen un mapa conceptual de un texto leído.","h"],["Resumen colaborativo","un resumen en grupo","Elaboran un resumen colaborativo de un texto extenso, cada integrante a cargo de una sección.","a"]],aa:["G","H"]}
+ },
+ oah:{a:"Comprender textos: localizar información, inferir y resumir.",b:"Interpretar textos literarios considerando sus elementos y contexto.",c:"Analizar y evaluar críticamente textos no literarios y de los medios.",d:"Escribir textos según el propósito, el género y el destinatario.",e:"Revisar, reescribir y editar textos con corrección gramatical y ortográfica.",f:"Expresarse oralmente ante una audiencia de forma clara y adecuada.",g:"Dialogar y argumentar de forma constructiva.",h:"Investigar, sintetizar y registrar información de diversas fuentes."},
+ oahs:{a:"Comprensión lectora",b:"Interpretación literaria",c:"Lectura crítica",d:"Producción escrita",e:"Revisión y edición",f:"Exposición oral",g:"Diálogo y argumentación",h:"Investigación y síntesis"},
+ oaa:{A:["Formar un pensamiento propio, reflexivo e informado mediante la lectura crítica y el diálogo.","se promueve al pedir a cada estudiante una opinión propia fundamentada en lo leído."],B:["Reflexionar sobre sí mismo y sobre las cuestiones sociales y éticas que surgen de las lecturas.","se promueve al discutir los dilemas éticos que plantean los textos."],C:["Interesarse por comprender las experiencias e ideas de los demás.","se promueve al escuchar activamente y reconocer el punto de vista de otros."],D:["Valorar la diversidad de perspectivas, creencias y culturas.","se promueve al leer textos de diversas culturas y épocas con respeto."],E:["Valorar el discurso oral y escrito para participar de forma informada y responsable en la sociedad.","se promueve al usar el lenguaje para opinar sobre temas de la comunidad."],F:["Valorar la evidencia y la búsqueda de conocimiento que respalde las afirmaciones.","se promueve al exigir citas y evidencias para respaldar las ideas."],G:["Realizar tareas con rigor y perseverancia.","se promueve al revisar y mejorar los propios trabajos en varias etapas."],H:["Trabajar colaborativamente y usar las tecnologías de forma responsable, dando crédito al trabajo de otros.","se promueve al trabajar en equipo con roles definidos y citar las fuentes utilizadas."]},
+ oaas:{A:"Pensamiento propio",B:"Reflexión ética",C:"Empatía",D:"Diversidad",E:"Participación ciudadana",F:"Valor de la evidencia",G:"Rigor y perseverancia",H:"Colaboración y TIC"},
+ res:{a:"Textos seleccionados y guía de lectura",b:"Obra literaria y guía de análisis",c:"Textos de los medios y pauta de análisis",d:"Pauta de escritura",e:"Pauta de revisión y diccionario",f:"Pauta de exposición oral",g:"Pauta de debate y roles",h:"Organizadores gráficos y pauta de investigación"}
+};
+
+const SUBJ={hist2m:HIST,bio1m:BIO,quim1m:QUIM,len8b:LEN};
+const CATALOG=[
+ {id:"hist",name:"Historia, Geografía y Ciencias Sociales",desc:"Historia de Chile y del mundo, y formación ciudadana",color:"var(--u1)",levels:[["2° Medio","hist2m"]]},
+ {id:"bio",name:"Biología",desc:"Ciencias Naturales, eje Biología",color:"var(--u2)",levels:[["1° Medio","bio1m"]]},
+ {id:"quim",name:"Química",desc:"Ciencias Naturales, eje Química",color:"var(--u3)",levels:[["1° Medio","quim1m"]]},
+ {id:"len",name:"Lengua y Literatura",desc:"Lectura, escritura, oralidad e investigación",color:"var(--u4)",levels:[["8° Básico","len8b"]]}
+];
+
+/* --- Catálogos comunes --- */
 const NEE={
  dua:{n:"DUA para todo el curso",d:"Diseño Universal para el Aprendizaje",s:["Presentar la información en múltiples formatos (texto, imagen, audio o video) y entregar un glosario con los conceptos clave: {c}.","Ofrecer opciones para demostrar lo aprendido: respuesta escrita, oral, esquema o dibujo explicativo.","Proporcionar organizadores gráficos y modelar el primer ejemplo de la actividad antes del trabajo autónomo.","Formar grupos heterogéneos con roles definidos (lector, secretario, vocero, controlador del tiempo)."]},
  tea:{n:"Condición del espectro autista (TEA)",d:"Anticipación y estructura",s:["Anticipar la estructura de la clase con una agenda visual en la pizarra y avisar los cambios de actividad.","Entregar instrucciones breves, concretas y por escrito; asignar un rol definido en el trabajo grupal.","Ofrecer la opción de trabajo individual o con una pareja estable y un espacio de regulación si lo requiere."]},
  tdah:{n:"TDAH",d:"Atención y autorregulación",s:["Segmentar la actividad en pasos cortos con tiempos visibles y una lista de verificación.","Ubicar al estudiante cerca del docente y asignarle responsabilidades activas (repartir material, registrar ideas).","Incorporar pausas activas breves y monitorear el avance cada 10 a 15 minutos."]},
- dea:{n:"Dificultades específicas del aprendizaje (DEA)",d:"Lectura y escritura",s:["Entregar textos con letra ampliada, interlineado amplio e ideas principales destacadas; permitir lectura en voz alta o en audio.","Reducir la extensión de las fuentes escritas sin alterar el objetivo y otorgar tiempo adicional.","Permitir respuestas orales o en esquema en lugar de producción escrita extensa."]},
- di:{n:"Discapacidad intelectual / FIL",d:"Ajuste de complejidad",s:["Priorizar una fuente principal con preguntas graduadas (literales, inferenciales y de opinión).","Apoyar con imágenes, ejemplos concretos y un glosario ilustrado de {c}.","Ajustar el nivel de logro esperado del indicador según el PACI del estudiante, si corresponde."]},
- sens:{n:"Discapacidad sensorial (visual o auditiva)",d:"Acceso a la información",s:["Describir verbalmente imágenes y mapas; ofrecer el material en macrotipo o en formato digital accesible.","Usar videos subtitulados y apoyar las instrucciones orales con texto escrito.","Ubicar al estudiante donde tenga buena visibilidad y audición de la clase."]},
- ext:{n:"Estudiantes extranjeros no hispanohablantes",d:"Apoyo lingüístico",s:["Entregar un glosario bilingüe o con imágenes de los conceptos {c}.","Asignar un compañero tutor y priorizar apoyos visuales (mapas, líneas de tiempo, imágenes).","Vincular el contenido con la historia del país de origen del estudiante cuando sea pertinente."]},
- ac:{n:"Altas capacidades",d:"Profundización",s:["Proponer una pregunta de desafío o una fuente historiográfica adicional para profundizar.","Asignar el rol de experto o moderador en la discusión grupal.","Invitar a elaborar un producto de mayor complejidad (ensayo breve con contraargumentación)."]}
+ dea:{n:"Dificultades específicas del aprendizaje (DEA)",d:"Lectura y escritura",s:["Entregar textos con letra ampliada, interlineado amplio e ideas principales destacadas; permitir lectura en voz alta o en audio.","Reducir la extensión de los textos sin alterar el objetivo y otorgar tiempo adicional.","Permitir respuestas orales o en esquema en lugar de producción escrita extensa."]},
+ di:{n:"Discapacidad intelectual / FIL",d:"Ajuste de complejidad",s:["Priorizar un texto o recurso principal con preguntas graduadas (literales, inferenciales y de opinión).","Apoyar con imágenes, ejemplos concretos y un glosario ilustrado de {c}.","Ajustar el nivel de logro esperado del indicador según el PACI del estudiante, si corresponde."]},
+ sens:{n:"Discapacidad sensorial (visual o auditiva)",d:"Acceso a la información",s:["Describir verbalmente imágenes, gráficos y mapas; ofrecer el material en macrotipo o en formato digital accesible.","Usar videos subtitulados y apoyar las instrucciones orales con texto escrito.","Ubicar al estudiante donde tenga buena visibilidad y audición de la clase."]},
+ ext:{n:"Estudiantes extranjeros no hispanohablantes",d:"Apoyo lingüístico",s:["Entregar un glosario bilingüe o con imágenes de los conceptos {c}.","Asignar un compañero tutor y priorizar apoyos visuales (imágenes, esquemas, organizadores).","Vincular el contenido con experiencias del país de origen del estudiante cuando sea pertinente."]},
+ ac:{n:"Altas capacidades",d:"Profundización",s:["Proponer una pregunta de desafío o un recurso adicional para profundizar.","Asignar el rol de experto o moderador en el trabajo grupal.","Invitar a elaborar un producto de mayor complejidad (por ejemplo, un texto argumentativo con contraargumentación)."]}
 };
-
+// kind: rubrica | escala | cotejo | spec (prueba escrita) | paes. x: criterios extra [texto, nivel Bloom 0-2]
 const INSTR={
- rub_ensayo:{n:"Rúbrica de ensayo argumentativo",kind:"rubrica",d:"Los estudiantes redactan un ensayo argumentativo que responde a una pregunta problematizadora, usando al menos dos fuentes.",x:["Formula una tesis clara y pertinente a la pregunta.","Fundamenta con evidencia de fuentes primarias o secundarias y las cita.","Considera y responde a un contraargumento.","Redacta con coherencia, cohesión y uso adecuado de conceptos disciplinares."]},
- prueba:{n:"Prueba escrita",kind:"spec",d:"Prueba escrita con ítems de selección múltiple, análisis de fuentes y una pregunta de desarrollo, construida a partir de una tabla de especificaciones alineada a los indicadores.",x:[]},
- rub_oral:{n:"Rúbrica de exposición oral",kind:"rubrica",d:"Presentación grupal de 5 a 7 minutos con apoyo visual sobre un tema estudiado, seguida de preguntas del curso.",x:["Organiza la exposición con introducción, desarrollo y conclusión.","Utiliza apoyo visual pertinente y cita las fuentes.","Responde preguntas con fundamentos."]},
- rub_debate:{n:"Rúbrica de debate",kind:"rubrica",d:"Debate formal en equipos con posturas asignadas: argumentación, réplica y conclusión.",x:["Presenta argumentos fundamentados en evidencia.","Refuta los argumentos contrarios con respeto.","Respeta los turnos y las normas del debate."]},
- escala:{n:"Escala de apreciación (trabajo de investigación)",kind:"escala",d:"Trabajo de investigación en grupos que culmina en un informe o póster, evaluado por etapas.",x:["Formula una pregunta de investigación pertinente.","Selecciona fuentes confiables y diversas.","Comunica conclusiones con estructura lógica y citas."]},
- cotejo:{n:"Lista de cotejo (producto)",kind:"cotejo",d:"Lista de cotejo para verificar desempeños en un producto (infografía, mapa, línea de tiempo u organizador).",x:["Entrega el producto en el plazo acordado.","Cita las fuentes utilizadas."]},
- portafolio:{n:"Portafolio de evidencias",kind:"cotejo",d:"Recopilación de los productos de las clases (fichas, tickets, organizadores) con una reflexión final sobre el propio aprendizaje.",x:["Incluye todas las evidencias solicitadas.","Presenta una reflexión sobre su proceso de aprendizaje."]}
+ rub_ensayo:{n:"Rúbrica de ensayo argumentativo",kind:"rubrica",d:"Los estudiantes redactan un texto argumentativo que responde a una pregunta problematizadora, usando al menos dos fuentes o evidencias.",x:[["Formula una tesis clara y pertinente a la pregunta.",2],["Fundamenta con evidencia y la cita.",1],["Considera y responde a un contraargumento.",2],["Redacta con coherencia, cohesión y vocabulario disciplinar.",1]]},
+ prueba:{n:"Prueba escrita",kind:"spec",d:"Prueba escrita con ítems de selección múltiple, análisis de estímulos y preguntas de desarrollo, construida a partir de una tabla de especificaciones alineada a los indicadores y a los niveles cognitivos.",x:[]},
+ paes:{n:"Prueba de selección múltiple PAES",kind:"paes",d:"Prueba de selección múltiple en formato PAES: cada pregunta tiene 4 alternativas (A, B, C y D) con una sola respuesta correcta y se basa en un estímulo (texto, gráfico, tabla o imagen). Cada ítem vale 1 punto y las respuestas incorrectas no descuentan puntaje.",x:[]},
+ rub_oral:{n:"Rúbrica de exposición oral",kind:"rubrica",d:"Presentación grupal de 5 a 7 minutos con apoyo visual sobre un tema estudiado, seguida de preguntas del curso.",x:[["Organiza la exposición con introducción, desarrollo y conclusión.",1],["Utiliza apoyo visual pertinente y cita las fuentes.",1],["Responde preguntas con fundamentos.",2]]},
+ rub_debate:{n:"Rúbrica de debate",kind:"rubrica",d:"Debate formal en equipos con posturas asignadas: argumentación, réplica y conclusión.",x:[["Presenta argumentos fundamentados en evidencia.",2],["Refuta los argumentos contrarios con respeto.",2],["Respeta los turnos y las normas del debate.",0]]},
+ escala:{n:"Escala de apreciación (trabajo de investigación)",kind:"escala",d:"Trabajo de investigación en grupos que culmina en un informe o póster, evaluado por etapas.",x:[["Formula una pregunta de investigación pertinente.",2],["Selecciona fuentes confiables y diversas.",1],["Comunica conclusiones con estructura lógica y referencias.",2]]},
+ cotejo:{n:"Lista de cotejo (producto)",kind:"cotejo",d:"Lista de cotejo para verificar desempeños en un producto (infografía, modelo, organizador, informe breve).",x:[["Entrega el producto en el plazo acordado.",0],["Cita las fuentes utilizadas.",0]]},
+ portafolio:{n:"Portafolio de evidencias",kind:"cotejo",d:"Recopilación de los productos de las clases (fichas, tickets, organizadores) con una reflexión final sobre el propio aprendizaje.",x:[["Incluye todas las evidencias solicitadas.",0],["Presenta una reflexión sobre su proceso de aprendizaje.",2]]}
 };
 const FORM={
  ticket:{n:"Ticket de salida",c:(q,k)=>`Ticket de salida: responden por escrito «${q}» usando al menos un concepto clave. El docente revisa las respuestas para retroalimentar la clase siguiente.`},
  r321:{n:"Rutina 3-2-1",c:(q,k)=>`Rutina 3-2-1: anotan 3 ideas aprendidas, 2 conceptos clave y 1 pregunta pendiente sobre ${k}. Se comparten algunas respuestas.`},
  semaforo:{n:"Semáforo de aprendizaje",c:(q,k)=>`Semáforo de aprendizaje: cada estudiante se autoevalúa respecto del objetivo (verde, amarillo o rojo) y justifica su elección en una frase. Se retoman los «rojos» al inicio de la clase siguiente.`},
  abcd:{n:"Tarjetas ABCD",c:(q,k)=>`Preguntas de selección múltiple con tarjetas ABCD sobre ${k}; el docente identifica errores frecuentes y los aclara en el momento.`},
- pizarras:{n:"Pizarras individuales",c:(q,k)=>`Pizarras individuales: responden «${q}» en una frase y la muestran simultáneamente; se retroalimenta en el momento.`}
+ pizarras:{n:"Pizarras individuales",c:(q,k)=>`Pizarras individuales: responden «${q}» en una frase y la muestran simultáneamente; se retroalimenta en el momento.`},
+ bisagra:{n:"Pregunta bisagra",c:(q,k)=>`Pregunta bisagra: se plantea una pregunta de selección múltiple sobre ${k} cuyas alternativas revelan errores frecuentes; según las respuestas se decide reforzar o avanzar.`},
+ coev:{n:"Coevaluación entre pares",c:(q,k)=>`Coevaluación: en parejas revisan el trabajo del compañero con una pauta breve de dos criterios y le entregan una sugerencia de mejora.`},
+ autoev:{n:"Autoevaluación con escala",c:(q,k)=>`Autoevaluación: marcan su nivel de logro del objetivo en una escala de 1 a 4 y escriben qué necesitan para avanzar.`},
+ resumen:{n:"Resumen en 280 caracteres",c:(q,k)=>`Resumen en 280 caracteres: sintetizan lo aprendido sobre ${k} como si fuera una publicación breve; se comparten tres ejemplos.`},
+ muro:{n:"Muro de conceptos",c:(q,k)=>`Muro de conceptos: cada estudiante escribe en una nota adhesiva un concepto clave y lo define con sus palabras; se revisan en conjunto las definiciones imprecisas.`}
 };
-const RES={a:"Papel kraft o plantilla de línea de tiempo",b:"Tabla de continuidad y cambio",c:"Esquema de duraciones",d:"Mapas mudos y atlas",e:"Gráficos y tablas de datos impresos o digitales",f:"Dossier de fuentes",g:"Dossier de fuentes primarias y guía de análisis",h:"Textos historiográficos y tabla comparativa",i:"Pauta de investigación y acceso a internet",j:"Organizador gráfico",k:"Pauta de debate y roles",l:"Materiales para el producto (cartulinas, dispositivos)",m:"Pauta de escritura argumentativa"};
+const BLOOM=[{n:"Básicas",p:"Recordar y comprender",v:"identificar, definir, describir, explicar",it:"Selección múltiple",ppi:1},{n:"Intermedias",p:"Aplicar y analizar",v:"aplicar, comparar, clasificar, interpretar",it:"Análisis de estímulo (respuesta breve)",ppi:2},{n:"Superiores",p:"Evaluar y crear",v:"evaluar, argumentar, proponer, diseñar",it:"Desarrollo",ppi:4}];
+const IND_LEVEL=[0,1,1,2];
 const MODES={clase:"Clase a clase",semanal:"Semanal",mensual:"Mensual",unidad:"Por unidad"};
 
+/* --- Asignatura activa --- */
+let D=null,OA={},UNITS=[],OAH={},OAHshort={},OAA={},OAAshort={},RES={};
+function useSubject(key){D=SUBJ[key]||null;if(!D)return;OA=D.OA;UNITS=D.units;OAH=D.oah;OAHshort=D.oahs;OAA=D.oaa;OAAshort=D.oaas;RES=D.res}
+const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
+
 /* ============ ESTADO ============ */
-const S={sel:new Set([1,2]),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,
- mom:{diag:true,form:true,sum:true},instr:"rub_ensayo",formStrat:"ticket",oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",
- datos:{esc:"",doc:"",curso:"2° Medio A",anio:"2027",inicio:""},q:""};
-try{const raw=localStorage.getItem("plan-hgcs2m");if(raw){const o=JSON.parse(raw);
- Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:""});}}catch(e){}
-function save(){try{localStorage.setItem("plan-hgcs2m",JSON.stringify({...S,sel:[...S.sel],nee:[...S.nee],oah:S.oah?[...S.oah]:null,oaa:S.oaa?[...S.oaa]:null}))}catch(e){}}
+const S={subj:null,key:null,selBy:{},sel:new Set(),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,
+ mom:{diag:true,form:true,sum:true},instr:"rub_ensayo",formStrat:"ticket",seed:12345,pts:60,bloom:[30,45,25],
+ oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",datos:{esc:"",doc:"",curso:"",anio:"2027",inicio:""},q:""};
+try{const raw=localStorage.getItem("plan-oa-v2");if(raw){const o=JSON.parse(raw);
+ Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:"",selBy:o.selBy||{},bloom:Array.isArray(o.bloom)&&o.bloom.length===3?o.bloom:[30,45,25],mom:Object.assign({diag:true,form:true,sum:true},o.mom||{})});}}catch(e){}
+if(S.key&&!SUBJ[S.key]){S.key=null}
+if(!INSTR[S.instr])S.instr="rub_ensayo";
+if(S.formStrat!=="random"&&!FORM[S.formStrat])S.formStrat="ticket";
+if(S.key)useSubject(S.key);
+function save(){try{if(S.key)S.selBy[S.key]=[...S.sel];localStorage.setItem("plan-oa-v2",JSON.stringify({...S,sel:[...S.sel],nee:[...S.nee],oah:S.oah?[...S.oah]:null,oaa:S.oaa?[...S.oaa]:null}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const selArr=()=>[...S.sel].sort((a,b)=>a-b);
-const ucolor=id=>`var(--u${id})`;
+const selArr=()=>[...S.sel].filter(n=>OA[n]).sort((a,b)=>a-b);
+const ucolor=id=>`var(--u${((id-1)%4)+1})`;
 function suggOAH(){const s=new Set();selArr().forEach(n=>OA[n].a.forEach(a=>s.add(a[3])));return s}
 function suggOAA(){const s=new Set();selArr().forEach(n=>OA[n].aa.forEach(x=>s.add(x)));return s}
 const curOAH=()=>S.oah||suggOAH();
 const curOAA=()=>S.oaa||suggOAA();
 function suggWeeks(){let w=0;UNITS.forEach(u=>{const k=u.oas.filter(n=>S.sel.has(n)).length;if(k)w+=Math.ceil(u.weeks*k/u.oas.length)});return Math.max(1,w)}
+
+/* ============ SELECTOR DE ASIGNATURA Y NIVEL ============ */
+function renderPicker(){
+ $("#subjects").innerHTML=CATALOG.map(c=>{const tot=c.levels.length;return`<button type="button" class="subj" data-subj="${c.id}" aria-pressed="${S.subj===c.id}" style="--sc:${c.color}"><span class="sn">${esc(c.name)}</span><span class="sd">${esc(c.desc)}</span><span class="sl">${tot} nivel${tot===1?"":"es"} disponible${tot===1?"":"s"}</span></button>`}).join("");
+ const lv=$("#levels");const c=CATALOG.find(x=>x.id===S.subj);
+ if(!c){lv.hidden=true;$("#pk-sum").textContent="Elige una asignatura para ver sus niveles";return}
+ lv.hidden=false;
+ lv.innerHTML=`<div class="lab">Niveles disponibles · ${esc(c.name)}</div><div class="lvls">${c.levels.map(([name,key])=>{const d=SUBJ[key];const n=Object.keys(d.OA).length;return`<button type="button" class="lvl" data-key="${key}" aria-pressed="${S.key===key}"><b>${name}</b><small>${n} OA · ${d.units.length} ${d.unitWord.toLowerCase()}${d.units.length===1?"":(d.unitWord==="Eje"?"s":"es")}</small></button>`}).join("")}</div>`;
+ $("#pk-sum").textContent=S.key?`${D.area} · ${D.level}`:"Ahora elige el nivel";
+}
+$("#subjects").addEventListener("click",e=>{const b=e.target.closest("[data-subj]");if(!b)return;
+ if(S.subj!==b.dataset.subj){S.subj=b.dataset.subj;const c=CATALOG.find(x=>x.id===S.subj);if(!c.levels.some(l=>l[1]===S.key)){if(S.key)S.selBy[S.key]=[...S.sel];S.key=null;D=null}}
+ update()});
+$("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-key]");if(!b)return;setKey(b.dataset.key)});
+function setKey(key){if(S.key===key)return;if(S.key)S.selBy[S.key]=[...S.sel];S.key=key;useSubject(key);S.sel=new Set((S.selBy[key]||[]).filter(n=>OA[n]));S.oah=null;S.oaa=null;S.semU=null;S.q="";$("#q").value="";
+ if(!S.datos.curso||/Medio|Básico/.test(S.datos.curso))S.datos.curso=D.level+" A";update()}
 
 /* ============ LISTA DE OA ============ */
 function renderOAList(){
@@ -337,9 +609,9 @@ function renderOAList(){
   const items=u.oas.filter(n=>!q||(OA[n].t+" "+OA[n].c.join(" ")+" oa "+n).toLowerCase().includes(q));
   if(!items.length)return;
   const all=u.oas.every(n=>S.sel.has(n));
-  h+=`<div class="unit" style="--uc:${ucolor(u.id)}"><div class="unit-h"><div class="ut"><div class="un">Unidad ${u.id}</div><div class="uname">${esc(u.name)}</div></div><button type="button" class="btn-mini" data-unit="${u.id}">${all?"Quitar unidad":"Toda la unidad"}</button></div>`;
+  h+=`<div class="unit" style="--uc:${ucolor(u.id)}"><div class="unit-h"><div class="ut"><div class="un">${D.unitWord} ${u.id}</div><div class="uname">${esc(u.name)}</div></div><button type="button" class="btn-mini" data-unit="${u.id}">${all?"Quitar todo":"Seleccionar todo"}</button></div>`;
   items.forEach(n=>{const on=S.sel.has(n);
-   h+=`<label class="oa${on?" sel":""}" style="--uc:${ucolor(u.id)}"><input type="checkbox" id="oa-${n}" data-oa="${n}" ${on?"checked":""}><span class="num">OA ${n}</span><span class="txt">${esc(OA[n].t)}<span class="eje">· ${EJE(n)}</span></span></label>`});
+   h+=`<label class="oa${on?" sel":""}" style="--uc:${ucolor(u.id)}"><input type="checkbox" id="oa-${n}" data-oa="${n}" ${on?"checked":""}><span class="num">OA ${n}</span><span class="txt">${esc(OA[n].t)}<span class="eje">· ${esc(D.eje(n))}</span></span></label>`});
   h+=`</div>`});
  box.innerHTML=h||`<div class="empty"><strong>Sin resultados</strong>Prueba con otra palabra clave.</div>`;
  $("#oa-count").textContent=`${S.sel.size} seleccionado${S.sel.size===1?"":"s"}`;
@@ -350,47 +622,59 @@ $("#q").addEventListener("input",e=>{S.q=e.target.value;renderOAList()});
 $("#clear").addEventListener("click",()=>{S.sel.clear();S.oah=null;S.oaa=null;update()});
 
 /* ============ PANEL DE OPCIONES ============ */
+function bloomPts(){const tot=Math.max(1,S.pts);const p=S.bloom.map(x=>Math.max(0,+x||0));const sum=p.reduce((a,b)=>a+b,0)||1;const pts=p.map(x=>Math.round(tot*x/sum));pts[2]=tot-pts[0]-pts[1];if(pts[2]<0){pts[1]+=pts[2];pts[2]=0}return pts}
+function bloomHint(){const sum=S.bloom.reduce((a,b)=>a+(+b||0),0);const pts=bloomPts();const pct=S.bloom.map(x=>Math.max(0,+x||0));const tot=pct.reduce((a,b)=>a+b,0)||1;
+ return{bad:sum!==100,html:`${sum!==100?`La suma es <b>${sum}%</b>; debe ser 100%. El documento ajusta los porcentajes de forma proporcional. `:`Suma: <b>100%</b>. `}Básicas <b>${pts[0]} pts</b> · Intermedias <b>${pts[1]} pts</b> · Superiores <b>${pts[2]} pts</b>`,bar:pct.map((x,i)=>`<span class="b${i}" style="width:${x/tot*100}%"></span>`).join("")}}
 function renderCfg(){
  const box=$("#cfg");
  if(!S.sel.size){box.innerHTML=`<div class="empty"><strong>Selecciona al menos un OA</strong>Al marcar un objetivo se despliegan las opciones de tiempo, evaluación, habilidades, actitudes y adecuaciones.</div>`;return}
- const tags=selArr().map(n=>`<span class="tag" style="--uc:${ucolor(unitOf(n).id)}"><b>OA ${n}</b> · U${unitOf(n).id}</span>`).join("");
- let tf="";
+ const tags=selArr().map(n=>`<span class="tag" style="--uc:${ucolor(unitOf(n).id)}"><b>OA ${n}</b> · ${D.unitWord==="Eje"?esc(unitOf(n).name):"U"+unitOf(n).id}</span>`).join("");
  const cps=`<div class="field"><label for="f-cps">Clases por semana</label><select id="f-cps">${[1,2,3,4].map(v=>`<option ${S.cps==v?"selected":""}>${v}</option>`).join("")}</select></div>`;
  const dur=`<div class="field"><label for="f-dur">Minutos por clase</label><select id="f-dur">${[45,60,80,90].map(v=>`<option value="${v}" ${S.dur==v?"selected":""}>${v} min</option>`).join("")}</select></div>`;
+ let tf="";
  if(S.mode==="clase")tf=`<div class="field"><label for="f-n">N° de clases</label><input type="number" id="f-n" min="1" max="40" value="${S.nClases}"></div>${cps}${dur}`;
  if(S.mode==="semanal")tf=`<div class="field"><label for="f-sem">N° de semanas</label><input type="number" id="f-sem" min="1" max="20" value="${S.semanas}"></div>${cps}${dur}`;
  if(S.mode==="mensual")tf=`<div class="field"><label for="f-mes">N° de meses</label><input type="number" id="f-mes" min="1" max="10" value="${S.meses}"></div>${cps}${dur}`;
- if(S.mode==="unidad")tf=`<div class="field"><label for="f-semu">Semanas de la unidad</label><input type="number" id="f-semu" min="1" max="40" value="${S.semU??suggWeeks()}"></div>${cps}${dur}`;
- const total=totalClasses();
- const hintU=S.mode==="unidad"?` Sugerido según el Programa: <b>${suggWeeks()} semanas</b>.`:"";
- const oah=curOAH(),oaa=curOAA();
+ if(S.mode==="unidad")tf=`<div class="field"><label for="f-semu">Semanas de la ${D.unitWord==="Eje"?"secuencia":"unidad"}</label><input type="number" id="f-semu" min="1" max="40" value="${S.semU??suggWeeks()}"></div>${cps}${dur}`;
+ const hintU=S.mode==="unidad"?` Sugerido: <b>${suggWeeks()} semanas</b>.`:"";
+ const oah=curOAH(),oaa=curOAA(),bh=bloomHint();
  box.innerHTML=`
  <div class="summary">${tags}</div>
- <div class="sec"><h3><b>2</b> Temporalidad</h3>
+ <div class="sec"><h3>Temporalidad</h3>
   <div class="seg" role="group" aria-label="Tipo de planificación">${Object.entries(MODES).map(([k,v])=>`<button type="button" data-mode="${k}" aria-pressed="${S.mode===k}">${v}</button>`).join("")}</div>
   <div class="fields">${tf}</div>
-  <div class="hint">Total: <b>${total} clases</b> de ${S.dur} min para ${S.sel.size} OA.${hintU}</div>
+  <div class="hint">Total: <b>${totalClasses()} clases</b> de ${S.dur} min para ${S.sel.size} OA.${hintU}</div>
  </div>
- <div class="sec"><h3><b>3</b> Evaluación</h3>
-  <div class="chips" role="group" aria-label="Momentos de evaluación">
+ <div class="sec"><h3>Evaluación</h3>
+  <div class="chips" role="group" aria-label="Tipos de evaluación">
    ${[["diag","Diagnóstica"],["form","Formativa"],["sum","Sumativa"]].map(([k,v])=>`<button type="button" class="chip" data-mom="${k}" aria-pressed="${S.mom[k]}">${v}</button>`).join("")}
   </div>
-  <div class="fields">
-   <div class="field"><label for="f-form">Estrategia formativa (cierre)</label><select id="f-form" ${S.mom.form?"":"disabled"}>${Object.entries(FORM).map(([k,v])=>`<option value="${k}" ${S.formStrat===k?"selected":""}>${v.n}</option>`).join("")}</select></div>
-   <div class="field"><label for="f-instr">Instrumento sumativo</label><select id="f-instr" ${S.mom.sum?"":"disabled"}>${Object.entries(INSTR).map(([k,v])=>`<option value="${k}" ${S.instr===k?"selected":""}>${v.n}</option>`).join("")}</select></div>
-  </div>
+  ${S.mom.form?`<div class="sub"><h4>Evaluación formativa</h4>
+   <div class="fields"><div class="field"><label for="f-form">Estrategia al cierre de cada clase</label><select id="f-form"><option value="random" ${S.formStrat==="random"?"selected":""}>Aleatorio (distinta en cada clase)</option>${Object.entries(FORM).map(([k,v])=>`<option value="${k}" ${S.formStrat===k?"selected":""}>${v.n}</option>`).join("")}</select></div></div>
+   ${S.formStrat==="random"?`<div class="hint">Se reparten las ${Object.keys(FORM).length} estrategias del catálogo entre las clases, sin repetir la misma en clases seguidas. <button type="button" class="btn-mini" data-act="reroll">Volver a sortear</button></div>`:""}
+  </div>`:""}
+  ${S.mom.sum?`<div class="sub"><h4>Evaluación sumativa</h4>
+   <div class="fields"><div class="field"><label for="f-instr">Instrumento</label><select id="f-instr">${Object.entries(INSTR).map(([k,v])=>`<option value="${k}" ${S.instr===k?"selected":""}>${v.n}</option>`).join("")}</select></div>
+   <div class="field"><label for="f-pts">Puntaje total</label><input type="number" id="f-pts" min="5" max="200" value="${S.pts}"></div></div>
+   <div class="lab">Habilidades cognitivas según la taxonomía de Bloom (%)</div>
+   <div class="fields">
+    ${BLOOM.map((b,i)=>`<div class="field"><label for="f-b${i}">${b.n} · ${b.p.toLowerCase()}</label><input type="number" id="f-b${i}" data-bloom="${i}" min="0" max="100" value="${S.bloom[i]}"></div>`).join("")}
+   </div>
+   <div class="bloombar" id="bloombar" aria-hidden="true">${bh.bar}</div>
+   <div class="hint${bh.bad?" bad":""}" id="bloomhint">${bh.html}</div>
+  </div>`:""}
  </div>
- <div class="sec"><h3><b>4</b> Habilidades y actitudes</h3>
-  <div class="lab">Habilidades (OAH) ${S.oah?`· <button type="button" class="btn-mini" data-reset="oah">Volver a sugeridas</button>`:"· sugeridas según los OA"}</div>
-  <div class="chips">${Object.keys(OAH).map(k=>`<button type="button" class="chip" data-oah="${k}" aria-pressed="${oah.has(k)}" title="${esc(OAH[k])}"><span class="k">${k}</span>${OAHshort[k]}</button>`).join("")}</div>
+ <div class="sec"><h3>Habilidades y actitudes</h3>
+  <div class="lab">${esc(D.hab)} ${S.oah?`· <button type="button" class="btn-mini" data-reset="oah">Volver a sugeridas</button>`:"· sugeridas según los OA"}</div>
+  <div class="chips">${Object.keys(OAH).map(k=>`<button type="button" class="chip" data-oah="${k}" aria-pressed="${oah.has(k)}" title="${esc(OAH[k])}"><span class="k">${k}</span>${esc(OAHshort[k])}</button>`).join("")}</div>
   <div class="lab">Actitudes (OAA) ${S.oaa?`· <button type="button" class="btn-mini" data-reset="oaa">Volver a sugeridas</button>`:"· sugeridas según los OA"}</div>
-  <div class="chips">${Object.keys(OAA).map(k=>`<button type="button" class="chip" data-oaa="${k}" aria-pressed="${oaa.has(k)}" title="${esc(OAA[k][0])}"><span class="k">${k}</span>${OAAshort[k]}</button>`).join("")}</div>
+  <div class="chips">${Object.keys(OAA).map(k=>`<button type="button" class="chip" data-oaa="${k}" aria-pressed="${oaa.has(k)}" title="${esc(OAA[k][0])}"><span class="k">${k}</span>${esc(OAAshort[k])}</button>`).join("")}</div>
  </div>
- <div class="sec"><h3><b>5</b> Adecuaciones</h3>
+ <div class="sec"><h3>Adecuaciones</h3>
   <div class="checks">${Object.entries(NEE).map(([k,v])=>`<label class="check"><input type="checkbox" id="nee-${k}" data-nee="${k}" ${S.nee.has(k)?"checked":""}><span>${v.n}<small>${v.d}</small></span></label>`).join("")}</div>
-  <div class="field"><label for="f-note">Nota adicional para adecuaciones (opcional)</label><textarea id="f-note" placeholder="Ej.: 2 estudiantes con PIE; un estudiante con PACI en lenguaje">${esc(S.neeNote)}</textarea></div>
+  <div class="field"><label for="f-note">Nota adicional para adecuaciones (opcional)</label><textarea id="f-note" placeholder="Ej.: 2 estudiantes con PIE; un estudiante con PACI">${esc(S.neeNote)}</textarea></div>
  </div>
- <div class="sec"><h3><b>6</b> Datos del documento</h3>
+ <div class="sec"><h3>Datos del documento</h3>
   <div class="fields">
    <div class="field"><label for="d-esc">Establecimiento</label><input type="text" id="d-esc" data-d="esc" value="${esc(S.datos.esc)}"></div>
    <div class="field"><label for="d-doc">Docente</label><input type="text" id="d-doc" data-d="doc" value="${esc(S.datos.doc)}"></div>
@@ -407,6 +691,7 @@ cfg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
  if(b.dataset.oah){const s=new Set(curOAH());s.has(b.dataset.oah)?s.delete(b.dataset.oah):s.add(b.dataset.oah);S.oah=s;update();return}
  if(b.dataset.oaa){const s=new Set(curOAA());s.has(b.dataset.oaa)?s.delete(b.dataset.oaa):s.add(b.dataset.oaa);S.oaa=s;update();return}
  if(b.dataset.reset){S[b.dataset.reset]=null;update();return}
+ if(b.dataset.act==="reroll"){S.seed=(Date.now()%2147483647)||1;renderDoc();save();msg("Se sortearon nuevamente las evaluaciones formativas.","ok");return}
 });
 const clampInt=(v,a,b,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.min(b,Math.max(a,v))};
 cfg.addEventListener("change",e=>{const t=e.target;
@@ -418,13 +703,21 @@ cfg.addEventListener("change",e=>{const t=e.target;
  else if(t.id==="f-dur")S.dur=+t.value;
  else if(t.id==="f-form")S.formStrat=t.value;
  else if(t.id==="f-instr")S.instr=t.value;
+ else if(t.id==="f-pts"){S.pts=clampInt(t.value,5,200,60);t.value=S.pts;refreshBloom();return}
+ else if(t.dataset.bloom){S.bloom[+t.dataset.bloom]=clampInt(t.value,0,100,0);t.value=S.bloom[+t.dataset.bloom];refreshBloom();return}
  else if(t.dataset.nee){t.checked?S.nee.add(t.dataset.nee):S.nee.delete(t.dataset.nee)}
  else if(t.dataset.d){S.datos[t.dataset.d]=t.value;renderDoc();save();return}
  else if(t.id==="f-note"){S.neeNote=t.value;renderDoc();save();return}
  else return;
  update();
 });
-cfg.addEventListener("input",e=>{const t=e.target;if(t.dataset.d){S.datos[t.dataset.d]=t.value;schedule()}else if(t.id==="f-note"){S.neeNote=t.value;schedule()}});
+cfg.addEventListener("input",e=>{const t=e.target;
+ if(t.dataset.d){S.datos[t.dataset.d]=t.value;schedule()}
+ else if(t.id==="f-note"){S.neeNote=t.value;schedule()}
+ else if(t.id==="f-pts"){const v=parseInt(t.value,10);if(v>=5&&v<=200){S.pts=v;refreshBloom(true)}}
+ else if(t.dataset.bloom){const v=parseInt(t.value,10);if(v>=0&&v<=100){S.bloom[+t.dataset.bloom]=v;refreshBloom(true)}}
+});
+function refreshBloom(deferDoc){const bh=bloomHint();const h=$("#bloomhint");if(h){h.innerHTML=bh.html;h.className="hint"+(bh.bad?" bad":"")}const bar=$("#bloombar");if(bar)bar.innerHTML=bh.bar;deferDoc?schedule():(renderDoc(),save())}
 let tmr;function schedule(){clearTimeout(tmr);tmr=setTimeout(()=>{renderDoc();save()},300)}
 
 /* ============ MOTOR DE PLANIFICACIÓN ============ */
@@ -436,7 +729,15 @@ function totalClasses(){
 }
 const r5=x=>Math.max(5,Math.round(x/5)*5);
 function times(){const i=r5(S.dur*.15),c=r5(S.dur*.15);return[i,S.dur-i-c,c]}
-function cycle(arr,i){return arr[i%arr.length]}
+const cycle=(arr,i)=>arr[i%arr.length];
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function formSeq(n){
+ if(S.formStrat!=="random")return Array(n).fill(S.formStrat);
+ const keys=Object.keys(FORM),r=rng(S.seed),out=[];let bag=[];
+ while(out.length<n){if(!bag.length){bag=keys.slice();for(let i=bag.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}if(out.length&&bag[0]===out[out.length-1])bag.push(bag.shift())}out.push(bag.shift())}
+ return out;
+}
+const formLabel=()=>S.formStrat==="random"?"aleatoria, distinta en cada clase":FORM[S.formStrat].n;
 
 function buildPlan(){
  const oas=selArr(),k=oas.length,N=totalClasses();
@@ -446,47 +747,48 @@ function buildPlan(){
   oas.forEach((n,i)=>{const m=base+(i<rem?1:0);for(let j=0;j<m;j++)groups.push({oas:[n],j,m})})}
  else{const per=Math.ceil(k/teach);for(let x=0;x<k;x+=per)groups.push({oas:oas.slice(x,x+per),j:0,m:1})}
  const [ti,td,tc]=times();
- const oahSel=[...curOAH()],oaaSel=[...curOAA()].sort();
+ const oaaSel=[...curOAA()].sort();
+ const seq=formSeq(groups.length);
  const classes=groups.map((g,idx)=>{
   const n=g.oas[0],o=OA[n],j=g.j,m=g.m,fi=j%3,foco=o.f[fi],act=o.a[j%3];
   const sint=m>=4&&j===m-1;const deep=!sint&&j>=3;
   const extra=g.oas.slice(1);
   let obj,ind,ini,des;
   if(sint){
-   obj=`Sintetizar los aprendizajes sobre ${o.k} mediante la elaboración de un organizador gráfico y su aplicación a fuentes nuevas.`;
+   obj=`Sintetizar los aprendizajes sobre ${o.k} mediante la elaboración de un organizador gráfico y su aplicación a situaciones nuevas.`;
    ind=o.i.slice(0,3);
    ini=`Recapitulación de las clases anteriores con la pregunta: «${o.f[0][2]}». Se comunica el objetivo de la clase.`;
-   des=`**Síntesis y aplicación:** en parejas construyen un mapa conceptual que integre ${o.c.join(", ")}. Luego resuelven una actividad con fuentes nuevas que permite verificar el logro de los indicadores trabajados. Se socializan dos o tres mapas y se retroalimenta.`;
+   des=`**Síntesis y aplicación:** en parejas construyen un mapa conceptual que integre ${o.c.join(", ")}. Luego resuelven una actividad con situaciones o recursos nuevos que permite verificar el logro de los indicadores trabajados. Se socializan dos o tres mapas y se retroalimenta.`;
   }else{
    obj=`${foco[0]} ${foco[1]}${extra.length?`, en relación con ${extra.map(x=>OA[x].k).join(" y ")}`:""}, mediante ${act[1]}.`;
    ind=m===1?o.i.slice(0,2):[o.i[j%4]];
    extra.forEach(x=>ind.push(OA[x].i[0]));
-   const pool=[`Se presenta el objetivo de la clase y la pregunta problematizadora: «${foco[2]}». Los estudiantes registran una hipótesis individual y la comparten en parejas.`,
-    `Rutina de pensamiento «Veo, pienso, me pregunto» a partir de una imagen o fuente vinculada a ${foco[1]}. Se comunica el objetivo de la clase.`,
+   const pool=[`Se presenta el objetivo de la clase y la pregunta problematizadora: «${foco[2]}». Los estudiantes registran una hipótesis o respuesta inicial y la comparten en parejas.`,
+    `Rutina de pensamiento «Veo, pienso, me pregunto» a partir de una imagen, texto o fenómeno vinculado a ${foco[1]}. Se comunica el objetivo de la clase.`,
     `Lluvia de ideas para activar conocimientos previos sobre ${o.c.slice(0,3).join(", ")}. Se plantea la pregunta: «${foco[2]}».`,
     `Recapitulación de la clase anterior con dos preguntas orales y presentación del objetivo. Pregunta guía: «${foco[2]}».`];
    ini=idx===0?pool[0]:cycle(pool,idx);
-   des=`**${act[0]}:** ${act[2]}${deep?" En esta clase de profundización se incorporan fuentes adicionales y se exige un mayor nivel de fundamentación.":""}${extra.length?` Se integra ${extra.map(x=>OA[x].k).join(" y ")} con una fuente breve para cada objetivo.`:""}`;
+   des=`**${act[0]}:** ${act[2]}${deep?" En esta clase de profundización se incorporan recursos adicionales y se exige un mayor nivel de fundamentación.":""}${extra.length?` Se integra ${extra.map(x=>OA[x].k).join(" y ")} con un recurso breve para cada objetivo.`:""}`;
   }
   if(idx===0&&S.mom.diag)ini=`**Diagnóstico:** cuestionario breve (5 preguntas) sobre conceptos previos (${o.c.slice(0,3).join(", ")}). `+ini;
-  const q=sint?o.f[0][2]:foco[2];
-  const cie=S.mom.form?FORM[S.formStrat].c(q,o.k):`Síntesis colectiva: el curso responde «${q}» y se registran las ideas principales en la pizarra.`;
+  const q=sint?o.f[0][2]:foco[2];const fk=seq[idx];
+  const cie=S.mom.form?FORM[fk].c(q,o.k):`Síntesis colectiva: el curso responde «${q}» y se registran las ideas principales en la pizarra.`;
   const ev=[];
   if(idx===0&&S.mom.diag)ev.push("Diagnóstica: cuestionario de conceptos previos (sin calificación).");
-  if(S.mom.form)ev.push(`Formativa: ${FORM[S.formStrat].n.toLowerCase()} que verifica el indicador «${ind[0]}»`);
+  if(S.mom.form)ev.push(`Formativa: ${FORM[fk].n.toLowerCase()} que verifica el indicador «${ind[0]}»`);
   if(!ev.length)ev.push("Observación del trabajo en clase.");
   const ad=[...S.nee].map(key=>`**${NEE[key].n}:** ${cycle(NEE[key].s,idx).replace("{c}",o.c.slice(0,4).join(", "))}`);
   if(S.neeNote.trim())ad.push(`**Nota:** ${S.neeNote.trim()}`);
-  const att=oaaSel.length?cycle(oaaSel,idx):null;
-  const hab=sint?"j":act[3];
-  return{num:idx+1,oas:g.oas,obj,ind,ini,des,cie,ev,ad,att,hab,habOk:oahSel.includes(hab),
-   res:sint?"Organizador gráfico, fuentes nuevas, proyector":`${RES[act[3]]}, proyector y presentación`,t:[ti,td,tc],act:sint?"Síntesis y aplicación":act[0]};
+  const hab=sint?Object.keys(OAH).find(x=>/crítico|Analizar resultados|Investigación|síntesis/i.test(OAHshort[x]))||act[3]:act[3];
+  return{num:idx+1,oas:g.oas,obj,ind,ini,des,cie,ev,ad,fk,att:oaaSel.length?cycle(oaaSel,idx):null,hab,
+   res:sint?"Organizador gráfico, recursos nuevos, proyector":`${RES[act[3]]||"Guía de trabajo"}, proyector y presentación`,t:[ti,td,tc],act:sint?"Síntesis y aplicación":act[0]};
  });
- if(sumClass){const I=INSTR[S.instr];const allInd=oas.flatMap(n=>OA[n].i.slice(0,2)).slice(0,6);const idx=classes.length;
-  classes.push({num:idx+1,oas,sum:true,obj:`Demostrar los aprendizajes sobre ${oas.map(n=>OA[n].k).join("; ")} mediante ${I.n.toLowerCase()}.`,ind:allInd,
-   ini:"Se explicitan los criterios de evaluación y se resuelven dudas sobre el instrumento.",des:`**Evaluación sumativa:** ${I.d}`,cie:"Autoevaluación del desempeño y del proceso de estudio; registro de metas para la siguiente unidad.",
-   ev:[`Sumativa: ${I.n}.`],ad:[...S.nee].map(key=>`**${NEE[key].n}:** ${key==="dua"?"Ofrecer formatos alternativos de respuesta (oral o escrita) con los mismos criterios.":key==="ac"?"Incluir una pregunta de desafío opcional de mayor complejidad.":"Aplicar la evaluación diferenciada (tiempo adicional, lectura mediada o formato ajustado) según el decreto 67 y el reglamento de evaluación."}`).concat(S.neeNote.trim()?[`**Nota:** ${S.neeNote.trim()}`]:[]),
-   att:oaaSel.length?cycle(oaaSel,idx):null,hab:"m",res:"Instrumento de evaluación impreso o digital",t:times(),act:I.n});
+ if(sumClass){const I=INSTR[S.instr];const idx=classes.length;const bp=bloomPts();
+  const allInd=oas.flatMap(n=>[OA[n].i[0],OA[n].i[2],OA[n].i[3]]).slice(0,6);
+  classes.push({num:idx+1,oas,sum:true,obj:`Demostrar los aprendizajes sobre ${oas.map(n=>OA[n].k).join("; ")} mediante ${I.n.charAt(0).toLowerCase()+I.n.slice(1)}.`,ind:allInd,
+   ini:"Se explicitan los criterios de evaluación y se resuelven dudas sobre el instrumento.",des:`**Evaluación sumativa:** ${I.d} Puntaje total: ${S.pts} puntos (básicas ${bp[0]}, intermedias ${bp[1]}, superiores ${bp[2]}).`,cie:"Autoevaluación del desempeño y del proceso de estudio; registro de metas para la siguiente etapa.",
+   ev:[`Sumativa: ${I.n} (${S.pts} puntos).`],ad:[...S.nee].map(key=>`**${NEE[key].n}:** ${key==="dua"?"Ofrecer formatos alternativos de respuesta (oral o escrita) con los mismos criterios.":key==="ac"?"Incluir una pregunta de desafío opcional de mayor complejidad.":"Aplicar evaluación diferenciada (tiempo adicional, lectura mediada o formato ajustado) según el Decreto 67 y el reglamento de evaluación."}`).concat(S.neeNote.trim()?[`**Nota:** ${S.neeNote.trim()}`]:[]),
+   att:oaaSel.length?cycle(oaaSel,idx):null,hab:Object.keys(OAH).slice(-1)[0],res:"Instrumento de evaluación impreso o digital",t:times(),act:I.n});
  }
  classes.forEach((c,i)=>{c.week=Math.floor(i/S.cps)+1;c.month=Math.floor((c.week-1)/4)+1});
  return{classes,oas,N};
@@ -496,12 +798,15 @@ function buildPlan(){
 function weekLabel(w){if(!S.datos.inicio)return`Semana ${w}`;const d=new Date(S.datos.inicio+"T12:00:00");if(isNaN(d))return`Semana ${w}`;d.setDate(d.getDate()+(w-1)*7);return`Semana ${w} (desde el ${d.toLocaleDateString("es-CL",{day:"numeric",month:"long"})})`}
 const attTxt=a=>a?`**OAA ${a}:** ${OAA[a][0]} Esta actitud ${OAA[a][1]}`:"Sin actitud seleccionada.";
 const indTxt=arr=>arr.map(x=>"• "+x).join("\n");
+const uniq=a=>[...new Set(a)];
+const strip=s=>s.replace(/\*\*/g,"");
+function groupBy(arr,key){const m=new Map();arr.forEach(x=>{if(!m.has(x[key]))m.set(x[key],[]);m.get(x[key]).push(x)});return[...m.entries()]}
 function buildBlocks(){
- const P=buildPlan(),B=[],oas=P.oas,units=[...new Set(oas.map(n=>unitOf(n).id))];
- B.push({t:"h1",x:`Planificación ${MODES[S.mode].toLowerCase()} · Historia, Geografía y Ciencias Sociales`});
- B.push({t:"kv",rows:[["Establecimiento",S.datos.esc||"—"],["Docente",S.datos.doc||"—"],["Curso / Año",`${S.datos.curso||"2° Medio"} · ${S.datos.anio||""}`],
-  ["Unidad",units.map(u=>`Unidad ${u}: ${UNITS[u-1].name}`).join("\n")],["Tiempo",`${P.classes.length} clases de ${S.dur} min (${S.cps} por semana; ${Math.ceil(P.classes.length/S.cps)} semanas aprox.)`],
-  ["Evaluación",[S.mom.diag&&"Diagnóstica",S.mom.form&&`Formativa (${FORM[S.formStrat].n})`,S.mom.sum&&`Sumativa (${INSTR[S.instr].n})`].filter(Boolean).join(" · ")||"—"]]});
+ const P=buildPlan(),B=[],oas=P.oas,units=uniq(oas.map(n=>unitOf(n).id)),C=P.classes;
+ B.push({t:"h1",x:`Planificación ${MODES[S.mode].toLowerCase()} · ${D.area} · ${D.level}`});
+ B.push({t:"kv",rows:[["Establecimiento",S.datos.esc||"—"],["Docente",S.datos.doc||"—"],["Asignatura / Nivel",`${D.area} · ${D.level}`],["Curso / Año",`${S.datos.curso||D.level} · ${S.datos.anio||""}`],
+  [D.unitWord,units.map(u=>`${D.unitWord} ${u}: ${UNITS.find(x=>x.id===u).name}`).join("\n")],["Tiempo",`${C.length} clases de ${S.dur} min (${S.cps} por semana; ${Math.ceil(C.length/S.cps)} semanas aprox.)`],
+  ["Evaluación",[S.mom.diag&&"Diagnóstica",S.mom.form&&`Formativa (${formLabel()})`,S.mom.sum&&`Sumativa (${INSTR[S.instr].n}, ${S.pts} puntos)`].filter(Boolean).join(" · ")||"—"]]});
  B.push({t:"h2",x:"Objetivos de Aprendizaje"});
  B.push({t:"table",w:[.12,.88],head:["OA","Descripción"],rows:oas.map(n=>[`**OA ${n}**`,OA[n].t])});
  const oah=[...curOAH()].sort(),oaa=[...curOAA()].sort();
@@ -509,14 +814,11 @@ function buildBlocks(){
  B.push({t:"kv",rows:[["Habilidades",oah.map(k=>`**${k})** ${OAH[k]}`).join("\n")||"—"],["Actitudes",oaa.map(k=>`**${k})** ${OAA[k][0]}`).join("\n")||"—"]]});
  B.push({t:"h2",x:"Indicadores de evaluación"});
  B.push({t:"table",w:[.12,.88],head:["OA","Indicadores"],rows:oas.map(n=>[`**OA ${n}**`,indTxt(OA[n].i)])});
-
- const C=P.classes;
  if(S.mode==="unidad"){
-  B.push({t:"h2",x:"Propósito de la unidad"});
-  units.forEach(u=>B.push({t:"p",x:`**Unidad ${u}.** ${UNITS[u-1].prop}`}));
-  B.push({t:"kv",rows:[["Conceptos clave",[...new Set(oas.flatMap(n=>OA[n].c))].join(", ")],["Preguntas problematizadoras",oas.map(n=>"• "+OA[n].f[0][2]).join("\n")]]});
+  B.push({t:"h2",x:`Propósito ${D.unitWord==="Eje"?"de la secuencia":"de la unidad"}`});
+  units.forEach(u=>{const U=UNITS.find(x=>x.id===u);B.push({t:"p",x:`**${D.unitWord} ${u} · ${U.name}.** ${U.prop}`})});
+  B.push({t:"kv",rows:[["Conceptos clave",uniq(oas.flatMap(n=>OA[n].c)).join(", ")],["Preguntas problematizadoras",oas.map(n=>"• "+OA[n].f[0][2]).join("\n")]]});
  }
-
  if(S.mode==="clase"){
   B.push({t:"h2",x:"Secuencia clase a clase"});
   C.forEach(c=>{B.push({t:"h3",x:`Clase ${c.num} · ${c.sum?"Evaluación sumativa":"OA "+c.oas.join(", ")} · ${weekLabel(c.week)}`});B.push({t:"kv",rows:classRows(c)})});
@@ -524,56 +826,75 @@ function buildBlocks(){
   B.push({t:"h2",x:"Planificación semanal"});
   groupBy(C,"week").forEach(([w,cs])=>{
    B.push({t:"h3",x:weekLabel(w)});
-   B.push({t:"kv",rows:[["Objetivo de la semana",`Al finalizar la semana, los estudiantes serán capaces de:\n${cs.map(c=>"• "+c.obj).join("\n")}`],["OA",[...new Set(cs.flatMap(c=>c.oas))].map(n=>"OA "+n).join(", ")]]});
+   B.push({t:"kv",rows:[["Objetivo de la semana",`Al finalizar la semana, los estudiantes serán capaces de:\n${cs.map(c=>"• "+c.obj).join("\n")}`],["OA",uniq(cs.flatMap(c=>c.oas)).map(n=>"OA "+n).join(", ")]]});
    B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.map(c=>[`**${c.num}**`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)])});
-   B.push({t:"kv",rows:[["Evaluación",uniq(cs.flatMap(c=>c.ev)).join("\n")],["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitud",uniq(cs.map(c=>c.att).filter(Boolean)).map(a=>attTxt(a)).join("\n")||"—"],["Recursos",uniq(cs.map(c=>c.res)).join("; ")]]});
+   B.push({t:"kv",rows:[["Evaluación",uniq(cs.flatMap(c=>c.ev)).join("\n")],["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitud",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"],["Recursos",uniq(cs.map(c=>c.res)).join("; ")]]});
   });
  }else{
   const byMonth=S.mode==="mensual";
-  B.push({t:"h2",x:byMonth?"Planificación mensual":"Secuencia de la unidad"});
-  const groups=byMonth?groupBy(C,"month"):[[1,C]];
-  groups.forEach(([m,cs])=>{
+  B.push({t:"h2",x:byMonth?"Planificación mensual":"Secuencia de la "+(D.unitWord==="Eje"?"secuencia didáctica":"unidad")});
+  (byMonth?groupBy(C,"month"):[[1,C]]).forEach(([m,cs])=>{
    if(byMonth)B.push({t:"h3",x:`Mes ${m}`});
-   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Objetivos de clase","Actividades","Indicadores y evaluación"],rows:groupBy(cs,"week").map(([w,ws])=>[`**${weekLabel(w)}**\nOA ${[...new Set(ws.flatMap(c=>c.oas))].join(", ")}`,ws.map(c=>`${c.num}. ${c.obj}`).join("\n"),ws.map(c=>`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`).join("\n"),uniq(ws.flatMap(c=>c.ind)).map(x=>"• "+x).join("\n")+"\n"+uniq(ws.flatMap(c=>c.ev)).map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")])});
-   B.push({t:"kv",rows:[["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitudes",uniq(cs.map(c=>c.att).filter(Boolean)).map(a=>attTxt(a)).join("\n")||"—"]]});
+   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Objetivos de clase","Actividades","Indicadores y evaluación"],rows:groupBy(cs,"week").map(([w,ws])=>[`**${weekLabel(w)}**\nOA ${uniq(ws.flatMap(c=>c.oas)).join(", ")}`,ws.map(c=>`${c.num}. ${c.obj}`).join("\n"),ws.map(c=>`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`).join("\n"),uniq(ws.flatMap(c=>c.ind)).map(x=>"• "+x).join("\n")+"\n"+uniq(ws.flatMap(c=>c.ev)).map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")])});
+   B.push({t:"kv",rows:[["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitudes",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"]]});
   });
-  if(!byMonth){B.push({t:"h3",x:"Estructura sugerida de cada clase"});B.push({t:"p",x:`Inicio (${times()[0]} min): pregunta problematizadora y objetivo · Desarrollo (${times()[1]} min): actividad central con fuentes · Cierre (${times()[2]} min): ${S.mom.form?FORM[S.formStrat].n.toLowerCase():"síntesis colectiva"}.`})}
+  if(!byMonth){const t=times();B.push({t:"h3",x:"Estructura sugerida de cada clase"});B.push({t:"p",x:`Inicio (${t[0]} min): pregunta problematizadora y objetivo · Desarrollo (${t[1]} min): actividad central · Cierre (${t[2]} min): evaluación formativa ${S.mom.form?formLabel():"y síntesis colectiva"}.`})}
  }
-
  B.push({t:"h2",x:"Evaluación"});
  const evRows=[];
  if(S.mom.diag)evRows.push(["Diagnóstica","Cuestionario breve de conceptos previos al inicio, sin calificación, para ajustar la secuencia."]);
- if(S.mom.form)evRows.push(["Formativa",`${FORM[S.formStrat].n} al cierre de cada clase, con retroalimentación al inicio de la siguiente.`]);
- if(S.mom.sum)evRows.push(["Sumativa",`${INSTR[S.instr].n}. ${INSTR[S.instr].d}${C.length<3?" (Con menos de 3 clases se sugiere aplicarla en una clase posterior.)":""}`]);
+ if(S.mom.form){const used=uniq(C.filter(c=>!c.sum).map(c=>FORM[c.fk].n));evRows.push(["Formativa",S.formStrat==="random"?`Estrategias asignadas aleatoriamente a las clases: ${used.join(", ")}. Se retroalimenta al inicio de la clase siguiente.`:`${FORM[S.formStrat].n} al cierre de cada clase, con retroalimentación al inicio de la siguiente.`])}
+ if(S.mom.sum)evRows.push(["Sumativa",`${INSTR[S.instr].n}. ${INSTR[S.instr].d} Puntaje total: ${S.pts} puntos. Nota 4,0 con el 60 % de logro (${Math.ceil(S.pts*.6)} puntos).${C.length<3?" Con menos de 3 clases planificadas, se sugiere aplicarla en una clase posterior.":""}`]);
  if(evRows.length)B.push({t:"kv",rows:evRows});
  if(S.mom.sum)instrBlocks(B,oas);
- B.push({t:"small",x:"Documento generado con el Planificador HGCS 2° Medio. Textos de OA adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013); verificar redacción oficial en curriculumnacional.cl."});
+ B.push({t:"small",x:`Documento generado con el Planificador de OA. Textos de OA adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013); verificar la redacción oficial en curriculumnacional.cl.`});
  return B;
 }
 function classRows(c){return[["Objetivo de la clase",c.obj],["OA",c.oas.map(n=>`OA ${n}`).join(", ")],["Indicadores",indTxt(c.ind)],["Habilidad",`${c.hab}) ${OAH[c.hab]}`],
  ["Actividad",`**Inicio (${c.t[0]} min):** ${c.ini}\n**Desarrollo (${c.t[1]} min):** ${c.des}\n**Cierre (${c.t[2]} min):** ${c.cie}`],["Evaluación",c.ev.join("\n")],["Adecuación",c.ad.join("\n")||"—"],["Actitud",attTxt(c.att)],["Recursos",c.res]]}
+
+/* Distribuye puntos entre n partes (enteros que suman total) */
+function split(total,n){if(n<=0)return[];const b=Math.floor(total/n),r=total%n;return Array.from({length:n},(_,i)=>b+(i<r?1:0))}
+function indicatorsByLevel(oas){const lv=[[],[],[]];oas.forEach(n=>OA[n].i.forEach((t,ix)=>lv[IND_LEVEL[ix]].push(t)));return lv}
 function instrBlocks(B,oas){
- const I=INSTR[S.instr];const ind=oas.flatMap(n=>OA[n].i.slice(0,2)).slice(0,6);const crit=ind.concat(I.x);
+ const I=INSTR[S.instr],bp=bloomPts();
+ B.push({t:"h3",x:"Distribución por habilidades cognitivas (taxonomía de Bloom)"});
+ const pctN=S.bloom.map(x=>Math.max(0,+x||0)),pt=pctN.reduce((a,b)=>a+b,0)||1;
+ B.push({t:"table",w:[.18,.24,.34,.1,.14],head:["Nivel","Procesos","Verbos asociados","%","Puntaje"],rows:BLOOM.map((b,i)=>[`**${b.n}**`,b.p,b.v,`${Math.round(pctN[i]/pt*100)} %`,`${bp[i]}`]).concat([["**Total**","","","100 %",`**${S.pts}**`]])});
  B.push({t:"h3",x:I.n});
- if(I.kind==="rubrica"){
-  B.push({t:"table",w:[.28,.24,.24,.24],head:["Criterio","Logrado (3)","Medianamente logrado (2)","Por lograr (1)"],rows:crit.map(c=>[c,"Cumple el criterio de forma completa, precisa y fundamentada con evidencia.","Cumple el criterio de forma parcial o con imprecisiones.","No cumple el criterio o lo hace con errores importantes."])});
-  B.push({t:"p",x:`Puntaje total: ${crit.length*3} puntos. Nota 4,0 con el 60% de logro (${Math.ceil(crit.length*3*.6)} puntos).`});
- }else if(I.kind==="escala"){
-  B.push({t:"table",w:[.6,.1,.1,.1,.1],head:["Criterio","4","3","2","1"],rows:crit.map(c=>[c,"","","",""])});
-  B.push({t:"p",x:"4 = Muy bueno · 3 = Bueno · 2 = Suficiente · 1 = Insuficiente. Puntaje total: "+crit.length*4+" puntos."});
- }else if(I.kind==="cotejo"){
-  B.push({t:"table",w:[.7,.1,.1,.1],head:["Indicador","Sí","No","Obs."],rows:crit.map(c=>[c,"","",""])});
- }else{
-  const tipos=["Selección múltiple","Análisis de fuente","Desarrollo breve","Verdadero o falso justificado"],cant=[4,2,1,3],pts=[1,2,4,2];
-  let tot=0;const rows=ind.map((c,i)=>{const t=i%4;const p=cant[t]*pts[t];tot+=p;return[c,tipos[t],String(cant[t]),String(p)]});
-  rows.push(["**Total**","","",`**${tot}**`]);
-  B.push({t:"table",w:[.52,.2,.12,.16],head:["Indicador","Tipo de ítem","N° de ítems","Puntaje"],rows});
-  B.push({t:"p",x:`Nota 4,0 con el 60% de logro (${Math.ceil(tot*.6)} puntos).`});
+ const lv=indicatorsByLevel(oas);
+ if(I.kind==="spec"||I.kind==="paes"){
+  const rows=[];let totI=0,totP=0;
+  BLOOM.forEach((b,L)=>{const P=bp[L];if(P<=0)return;let ppi=I.kind==="paes"?1:b.ppi;const list=lv[L].length?lv[L]:lv.flat();
+   let count=Math.floor(P/ppi);if(count===0){count=1;ppi=P}const rem=P-count*ppi;
+   const per=split(count,Math.min(list.length,count));
+   per.forEach((c,ix)=>{const pts=c*ppi+(ix===0?rem:0);totI+=c;totP+=pts;
+    rows.push([list[ix],b.n,I.kind==="paes"?"Selección múltiple (4 alternativas)":b.it,String(c),String(pts)])});
+  });
+  rows.push(["**Total**","","",`**${totI}**`,`**${totP}**`]);
+  B.push({t:"table",w:[.44,.13,.2,.1,.13],head:["Indicador","Nivel","Tipo de ítem","N° ítems","Puntaje"],rows});
+  if(I.kind==="paes")B.push({t:"p",x:`Formato PAES: ${totI} preguntas de selección múltiple con 4 alternativas (A–D) y una sola respuesta correcta, basadas en estímulos. Puntaje total ${totP} puntos (1 punto por pregunta, sin descuento por error). Nota 4,0 con ${Math.ceil(totP*.6)} puntos (60 %).`});
+  else B.push({t:"p",x:`Ítems de nivel básico: ${BLOOM[0].ppi} punto c/u; intermedio: ${BLOOM[1].ppi} puntos c/u; superior: ${BLOOM[2].ppi} puntos c/u (el resto se suma al primer ítem del nivel). Nota 4,0 con ${Math.ceil(totP*.6)} puntos (60 %).`});
+  return;
  }
+ // Instrumentos con criterios: rúbrica, escala, cotejo
+ const crit=[];oas.slice(0,3).forEach(n=>{crit.push([OA[n].i[0],0]);crit.push([OA[n].i[2],1]);crit.push([OA[n].i[3],2])});
+ I.x.forEach(x=>crit.push(x));
+ const pts=bp.slice();
+ [0,1,2].forEach(L=>{if(pts[L]>0&&!crit.some(c=>c[1]===L)){const tgt=[1,2,0].find(x=>crit.some(c=>c[1]===x));pts[tgt]+=pts[L];pts[L]=0}});
+ const cp=crit.map(()=>0);[0,1,2].forEach(L=>{const idx=crit.map((c,i)=>c[1]===L?i:-1).filter(i=>i>=0);split(pts[L],idx.length).forEach((p,k)=>cp[idx[k]]=p)});
+ const lvlName=L=>BLOOM[L].n;
+ if(I.kind==="rubrica"){
+  B.push({t:"table",w:[.27,.11,.08,.18,.18,.18],head:["Criterio","Nivel","Pts.","Logrado","Medianamente logrado","Por lograr"],rows:crit.map((c,i)=>[c[0],lvlName(c[1]),String(cp[i]),`Cumple el criterio de forma completa y fundamentada (${cp[i]} pts).`,`Cumple de forma parcial o con imprecisiones (${Math.round(cp[i]/2)} pts).`,`No cumple o presenta errores importantes (0 pts).`]).concat([["**Total**","",`**${cp.reduce((a,b)=>a+b,0)}**`,"","",""]])});
+ }else if(I.kind==="escala"){
+  B.push({t:"table",w:[.4,.12,.08,.1,.1,.1,.1],head:["Criterio","Nivel","Pts.","4","3","2","1"],rows:crit.map((c,i)=>[c[0],lvlName(c[1]),String(cp[i]),"","","",""]).concat([["**Total**","",`**${cp.reduce((a,b)=>a+b,0)}**`,"","","",""]])});
+  B.push({t:"p",x:"4 = Muy bueno (100 % del puntaje del criterio) · 3 = Bueno (75 %) · 2 = Suficiente (50 %) · 1 = Insuficiente (25 %)."});
+ }else{
+  B.push({t:"table",w:[.5,.14,.1,.08,.08,.1],head:["Indicador","Nivel","Pts.","Sí","No","Obs."],rows:crit.map((c,i)=>[c[0],lvlName(c[1]),String(cp[i]),"","",""]).concat([["**Total**","",`**${cp.reduce((a,b)=>a+b,0)}**`,"","",""]])});
+  B.push({t:"p",x:"«Sí» otorga el puntaje completo del indicador; «No» otorga 0 puntos."});
+ }
+ B.push({t:"p",x:`Nota 4,0 con el 60 % de logro (${Math.ceil(S.pts*.6)} de ${S.pts} puntos).`});
 }
-const uniq=a=>[...new Set(a)];
-const strip=s=>s.replace(/\*\*/g,"");
-function groupBy(arr,key){const m=new Map();arr.forEach(x=>{if(!m.has(x[key]))m.set(x[key],[]);m.get(x[key]).push(x)});return[...m.entries()]}
 
 /* ============ RENDER HTML ============ */
 function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")}
@@ -622,12 +943,19 @@ async function makeDocx(B){
 /* ============ DOCUMENTO / ACCIONES ============ */
 let blocks=[];
 function renderDoc(){
+ if(!D)return;
  const empty=!S.sel.size;$("#dl").disabled=empty;$("#cp").disabled=empty;
  if(empty){$("#doc").innerHTML=`<div class="empty"><strong>El documento aparecerá aquí</strong>Selecciona uno o más OA para generar la planificación.</div>`;return}
  blocks=buildBlocks();$("#doc").innerHTML=blocksHTML(blocks);
 }
-function steps(){$("#st1").classList.toggle("on",true);["#st2","#st3","#st4"].forEach(s=>$(s).classList.toggle("on",S.sel.size>0))}
-function update(){renderOAList();renderCfg();renderDoc();steps();save()}
+function steps(){$("#st2").classList.toggle("on",!!S.key);$("#st3").classList.toggle("on",!!S.key&&S.sel.size>0);$("#st4").classList.toggle("on",!!S.key&&S.sel.size>0)}
+function update(){
+ renderPicker();
+ const ready=!!(S.key&&D);$("#work").hidden=!ready;$("#start").hidden=ready;
+ $("#start").innerHTML=S.subj?`<strong>Elige un nivel</strong>Selecciona uno de los niveles disponibles para ver sus Objetivos de Aprendizaje.`:`<strong>Elige una asignatura y un nivel</strong>Luego aparecerán los Objetivos de Aprendizaje de ese nivel y las opciones de planificación.`;
+ if(ready){$("#eyebrow").textContent=`${D.area} · ${D.level}`;renderOAList();renderCfg();renderDoc()}
+ steps();save();
+}
 function msg(t,cls){const m=$("#msg");m.textContent=t;m.className="msg"+(cls?" "+cls:"")}
 
 let dlNS;
@@ -639,7 +967,7 @@ $("#dl").addEventListener("click",async()=>{
  if(inClaude&&!dlNS){msg("La descarga no está disponible en esta vista. Usa «Copiar» y pega en Word o Google Docs.","err");return}
  msg("Generando documento…");
  try{const blob=await makeDocx(blocks);
-  const fn=`Planificacion_HGCS_2M_${MODES[S.mode].replace(/\s+/g,"_")}_OA${selArr().join("-")}.docx`;
+  const fn=`Planificacion_${D.file}_${MODES[S.mode].replace(/\s+/g,"_")}_OA${selArr().join("-")}.docx`;
   if(dlNS){await dlNS.save({filename:fn,data:blob})}
   else{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
   msg("Documento descargado.","ok");
