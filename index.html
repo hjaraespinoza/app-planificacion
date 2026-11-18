@@ -1,0 +1,656 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body><title>Planificador HGCS 2° Medio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: two-column workbench (OA list | planning options) above a full-width document preview that mirrors the Word output */
+:root{
+  --bg:#F2F4F7; --panel:#FFFFFF; --ink:#16202B; --muted:#5A6774; --line:#D6DDE5; --soft:#E9EEF4;
+  --accent:#234E8C; --accent-ink:#FFFFFF; --accent-soft:#E3EBF7;
+  --u1:#9A4A1B; --u2:#2C6A5B; --u3:#6A3F8C; --u4:#1F5E9E;
+  --ok:#2C6A5B; --warn:#9A4A1B;
+  --paper:#FFFFFF; --paper-ink:#1B2430; --paper-line:#C9D2DD; --paper-head:#E9EEF5;
+  --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F141A; --panel:#171E27; --ink:#E5EAF0; --muted:#9AA6B3; --line:#2B3643; --soft:#1F2833;
+  --accent:#8EB4EC; --accent-ink:#0F141A; --accent-soft:#1E2B3E;
+  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#E09A6E;
+  --paper:#1B232D; --paper-ink:#E5EAF0; --paper-line:#344252; --paper-head:#222D3A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F141A; --panel:#171E27; --ink:#E5EAF0; --muted:#9AA6B3; --line:#2B3643; --soft:#1F2833;
+  --accent:#8EB4EC; --accent-ink:#0F141A; --accent-soft:#1E2B3E;
+  --u1:#E09A6E; --u2:#7CC3AE; --u3:#BE9BE0; --u4:#86B5E8; --ok:#7CC3AE; --warn:#E09A6E;
+  --paper:#1B232D; --paper-ink:#E5EAF0; --paper-line:#344252; --paper-head:#222D3A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-size:28px;line-height:1.15;margin:4px 0 0;text-wrap:balance}
+.lede{color:var(--muted);max-width:62ch;margin:6px 0 0}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps span{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--panel)}
+.steps span.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
+.panel>.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ph h2{font-family:var(--f-display);font-size:17px;margin:0}
+.ph .count{font-size:12px;color:var(--muted)}
+.pb{padding:14px 16px}
+input[type=search],input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:60px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.oa:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.oalist{max-height:760px;overflow:auto;padding:4px 16px 16px}
+@media (max-width:960px){.oalist{max-height:none}}
+.unit{margin-top:14px}
+.unit-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0 8px;border-bottom:2px solid var(--uc);position:sticky;top:0;background:var(--panel);z-index:1}
+.unit-h .ut{min-width:0}
+.unit-h .un{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--uc)}
+.unit-h .uname{font-family:var(--f-display);font-weight:600;font-size:14px;line-height:1.3}
+.btn-mini{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 9px;cursor:pointer;white-space:nowrap}
+.btn-mini:hover{border-color:var(--accent);color:var(--accent)}
+.oa{display:grid;grid-template-columns:auto 52px minmax(0,1fr);gap:10px;align-items:start;padding:10px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-top:6px}
+.oa:hover{background:var(--soft)}
+.oa input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px}
+.oa .num{font-family:var(--f-display);font-weight:700;color:var(--uc);font-variant-numeric:tabular-nums}
+.oa .txt{font-size:13px;color:var(--ink)}
+.oa .eje{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:4px}
+.oa.sel{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:16px;margin-bottom:4px}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.sec:last-child{border-bottom:0}
+.sec h3{margin:0;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;gap:8px;align-items:baseline}
+.sec h3 b{font-family:var(--f-display);color:var(--accent);font-size:13px}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden}
+@media (max-width:520px){.seg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.seg button{font:inherit;font-size:13px;padding:9px 6px;border:0;border-right:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.seg button:last-child{border-right:0}
+@media (max-width:520px){.seg button:nth-child(2){border-right:0}.seg button:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.field{display:grid;gap:4px;min-width:0}
+.field label,.lab{font-size:12px;color:var(--muted);font-weight:500}
+.hint{font-size:12px;color:var(--muted)}
+.hint b{color:var(--ink);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer;text-align:left}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip .k{font-weight:700;margin-right:4px}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
+.check input{accent-color:var(--accent);margin-top:2px}
+.check small{display:block;color:var(--muted);font-size:11.5px}
+.summary{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+.tag{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.tag b{color:var(--uc,var(--accent))}
+/* Preview */
+.preview{margin-top:24px}
+.pv-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.pv-bar h2{font-family:var(--f-display);font-size:20px;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;padding:9px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--panel);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;color:var(--muted);min-height:1.2em}
+.msg.ok{color:var(--ok)}.msg.err{color:var(--warn)}
+.paperwrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line);background:var(--soft);padding:20px 12px}
+.doc{background:var(--paper);color:var(--paper-ink);max-width:880px;margin:0 auto;padding:36px 40px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-family:Calibri,Carlito,var(--f-body);font-size:13.5px;line-height:1.45}
+@media (max-width:600px){.doc{padding:22px 16px}}
+.doc h1{font-family:Calibri,Carlito,var(--f-body);font-size:22px;color:var(--accent);margin:0 0 6px}
+.doc h2{font-size:17px;color:var(--accent);margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--paper-line)}
+.doc h3{font-size:15px;margin:18px 0 6px}
+.doc p{margin:0 0 6px}
+.doc .small{font-size:12px;color:var(--muted)}
+.doc ul{margin:0 0 8px;padding-left:20px}
+.doc li{margin-bottom:3px}
+.doc table{width:100%;border-collapse:collapse;margin:4px 0 12px;table-layout:fixed}
+.doc td,.doc th{border:1px solid var(--paper-line);padding:6px 8px;vertical-align:top;text-align:left;font-size:12.5px;overflow-wrap:anywhere}
+.doc th{background:var(--paper-head);font-weight:700}
+.doc td.k{background:var(--paper-head);font-weight:700;width:24%}
+.doc td p{margin:0 0 4px}.doc td p:last-child{margin:0}
+.note{font-size:12px;color:var(--muted);margin-top:10px;max-width:80ch}
+@media (prefers-reduced-motion:no-preference){.oa,.chip,.btn{transition:background-color .15s,border-color .15s,color .15s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Historia, Geografía y Ciencias Sociales · 2° Medio</div>
+      <h1>Planificador de OA</h1>
+      <p class="lede">Elige los Objetivos de Aprendizaje, define el horizonte de tiempo y la evaluación, y descarga la planificación en Word con indicadores, objetivos de clase, actividades, adecuaciones y actitudes.</p>
+    </div>
+    <div class="steps" aria-label="Pasos">
+      <span id="st1" class="on">1 · OA</span><span id="st2">2 · Tiempo</span><span id="st3">3 · Evaluación</span><span id="st4">4 · Documento</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="oa-h">
+      <div class="ph"><h2 id="oa-h">Objetivos de Aprendizaje</h2><span class="count" id="oa-count">0 seleccionados</span></div>
+      <div class="pb" style="padding-bottom:0"><input type="search" id="q" placeholder="Buscar por palabra clave (ej. Guerra Fría, Constitución, pobreza)"></div>
+      <div class="oalist" id="oalist"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="cfg-h" id="cfgpanel">
+      <div class="ph"><h2 id="cfg-h">Opciones de planificación</h2><button class="btn-mini" id="clear" type="button">Limpiar selección</button></div>
+      <div id="cfg"></div>
+    </section>
+  </div>
+
+  <section class="preview" id="preview" aria-labelledby="pv-h">
+    <div class="pv-bar">
+      <div>
+        <h2 id="pv-h">Vista previa del documento</h2>
+        <div class="msg" id="msg"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="dl" type="button">Descargar Word (.docx)</button>
+        <button class="btn ghost" id="cp" type="button">Copiar para pegar en Word o Docs</button>
+      </div>
+    </div>
+    <div class="paperwrap"><div class="doc" id="doc"></div></div>
+    <p class="note">Los textos de los OA están adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013) y el Programa de Estudio 2° Medio. Antes de entregar la planificación, contrasta la redacción oficial en curriculumnacional.cl. Indicadores, actividades y adecuaciones son propuestas editables una vez abierto el archivo en Word.</p>
+  </section>
+</div>
+
+<script>
+/* ============ DATOS CURRICULARES ============ */
+const UNITS=[
+ {id:1,name:"Crisis, totalitarismo y guerra en la primera mitad del siglo XX: desafíos para el Estado y la democracia en Chile y el mundo",weeks:10,oas:[1,2,3,4,5,6,7],
+  prop:"Que los estudiantes comprendan la crisis del liberalismo en la primera mitad del siglo XX, el surgimiento de los totalitarismos y la Segunda Guerra Mundial, y cómo Chile enfrentó la crisis de su sistema político y económico, reconstruyendo su institucionalidad y ampliando su democracia."},
+ {id:2,name:"El mundo bipolar: proyectos políticos, transformaciones estructurales y quiebre de la democracia en Chile",weeks:10,oas:[8,9,10,11,12,13,14,15],
+  prop:"Que los estudiantes comprendan la Guerra Fría como marco del conflicto ideológico mundial y latinoamericano, y analicen las transformaciones estructurales en Chile, la polarización y el quiebre de la democracia en 1973 desde distintas interpretaciones."},
+ {id:3,name:"Dictadura militar, transición política y los desafíos de la democracia en Chile",weeks:10,oas:[16,17,18,19,20,21],
+  prop:"Que los estudiantes comprendan la supresión del Estado de derecho y las violaciones a los derechos humanos durante la dictadura, las transformaciones económicas e institucionales, y el proceso de recuperación de la democracia y sus desafíos."},
+ {id:4,name:"Formación ciudadana: Estado de derecho, sociedad y diversidad",weeks:8,oas:[22,23,24,25],
+  prop:"Que los estudiantes comprendan los derechos humanos y el Estado de derecho como bases de la convivencia democrática, y debatan sobre los desafíos pendientes del país: pobreza, desigualdad, sustentabilidad y diversidad."}
+];
+const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
+
+// Estructura: t texto OA · k tema corto · c conceptos · f focos [verbo, tema, pregunta] · i indicadores · a actividades [nombre, "mediante...", descripción, habilidad] · aa actitudes sugeridas
+const OA={
+1:{t:"Relacionar las transformaciones culturales del período de entreguerras con la ruptura de los cánones culturales y estéticos tradicionales, considerando el surgimiento de las vanguardias artísticas y el desarrollo de una cultura de masas (radio, cine, publicidad, deporte).",k:"las transformaciones culturales de entreguerras",c:["vanguardias","cultura de masas","entreguerras","modernidad"],
+ f:[["Analizar","las vanguardias artísticas como ruptura de los cánones estéticos tradicionales","¿Por qué el arte de comienzos del siglo XX rompió con las formas tradicionales?"],["Relacionar","la masificación de la radio, el cine y la publicidad con nuevas formas de vida","¿Cómo cambió la vida cotidiana con la llegada de la cultura de masas?"],["Explicar","el impacto de la Primera Guerra Mundial en la confianza en el progreso","¿Qué efecto tuvo la guerra en la idea de progreso heredada del siglo XIX?"]],
+ i:["Describen características de las vanguardias artísticas (cubismo, dadaísmo, surrealismo, expresionismo) a partir de obras.","Explican cómo las vanguardias rompieron con los cánones estéticos tradicionales.","Relacionan el desarrollo de la radio, el cine y la publicidad con el surgimiento de una cultura de masas.","Establecen relaciones entre las transformaciones culturales de entreguerras y la crisis de la confianza en el progreso."],
+ a:[["Galería de vanguardias","el análisis comparado de obras artísticas","En grupos analizan reproducciones de obras (Picasso, Dalí, Duchamp, Kandinsky) con una ficha guía: técnica, ruptura respecto del arte académico y contexto histórico. Cada grupo expone su conclusión en un plenario.","j"],["Detectives de la cultura de masas","el análisis de fuentes primarias (afiches, avisos y programación radial)","Analizan avisos publicitarios, afiches de cine y programación radial de los años 20 y 30; identifican qué valores y estilos de vida promueven y los comparan con la actualidad.","g"],["Línea de tiempo cultural","la construcción de una línea de tiempo","Construyen una línea de tiempo 1914–1939 que sitúe hitos culturales (movimientos artísticos, primeras transmisiones de radio, cine sonoro) junto a hitos políticos, reconociendo simultaneidad.","a"]],aa:["G","C"]},
+2:{t:"Analizar la crisis del Estado liberal decimonónico a comienzos del siglo XX y el surgimiento de nuevos modelos políticos y económicos tras la crisis de 1929, como los totalitarismos (fascismo, nazismo, estalinismo), el populismo latinoamericano y los inicios del Estado de Bienestar.",k:"la crisis del Estado liberal y los nuevos modelos políticos",c:["Estado liberal","crisis de 1929","totalitarismo","populismo","Estado de Bienestar"],
+ f:[["Explicar","las causas y efectos de la crisis económica de 1929","¿Cómo una crisis bursátil en Nueva York afectó a todo el mundo?"],["Caracterizar","los regímenes totalitarios (fascismo, nazismo y estalinismo)","¿Qué tienen en común los totalitarismos y en qué se diferencian?"],["Comparar","las respuestas a la crisis: totalitarismo, populismo y Estado de Bienestar","¿Qué rol debe tener el Estado frente a una crisis?"]],
+ i:["Explican causas y consecuencias de la crisis de 1929 a escala mundial.","Caracterizan los totalitarismos considerando partido único, culto al líder, propaganda, control social y represión.","Comparan las respuestas a la crisis del liberalismo (totalitarismos, populismos y Estado de Bienestar).","Evalúan el impacto de los totalitarismos en los derechos de las personas usando fuentes diversas."],
+ a:[["Cuadro comparativo de totalitarismos","la elaboración de un cuadro comparativo","En parejas completan un cuadro comparativo de fascismo, nazismo y estalinismo (ideología, líder, economía, propaganda, represión) usando textos breves y fuentes visuales.","b"],["Análisis de propaganda","el análisis crítico de propaganda política","Analizan carteles de propaganda de los regímenes totalitarios identificando emisor, mensaje, destinatario y técnicas persuasivas; reflexionan sobre la manipulación de la información.","j"],["Mesa de expertos: ¿qué hacer con la crisis?","un juego de roles","Representan a asesores de distintos gobiernos de 1930 que proponen soluciones a la crisis (New Deal, economía planificada, autarquía); el curso discute ventajas y costos de cada modelo.","k"]],aa:["A","E"]},
+3:{t:"Analizar la Segunda Guerra Mundial considerando sus causas, la expansión territorial y la rivalidad ideológica de las potencias, el genocidio del pueblo judío y otros crímenes contra la humanidad, la participación de la población civil y el uso de la bomba atómica.",k:"la Segunda Guerra Mundial",c:["Segunda Guerra Mundial","Holocausto","genocidio","guerra total","bomba atómica"],
+ f:[["Explicar","las causas de la Segunda Guerra Mundial","¿Era evitable la Segunda Guerra Mundial?"],["Analizar","el Holocausto y otros crímenes contra la humanidad","¿Cómo fue posible el exterminio sistemático de millones de personas?"],["Analizar","el impacto de la guerra total en la población civil y el uso de la bomba atómica","¿Por qué la Segunda Guerra Mundial afectó tanto a la población civil?"]],
+ i:["Explican las causas de la Segunda Guerra Mundial considerando factores políticos, económicos e ideológicos.","Caracterizan el Holocausto como genocidio, reconociendo sus etapas y víctimas.","Analizan el impacto de la guerra sobre la población civil a partir de testimonios y datos.","Argumentan sobre las implicancias éticas del uso de la bomba atómica."],
+ a:[["Mapa de la expansión","la elaboración e interpretación de mapas históricos","Representan en mapas la expansión del Eje entre 1938 y 1942 y el avance aliado hasta 1945; responden preguntas sobre la relación entre territorio, recursos y estrategia.","d"],["Testimonios del Holocausto","el análisis de testimonios","Leen fragmentos de testimonios (Ana Frank, Primo Levi) y analizan las etapas del genocidio; elaboran una reflexión escrita sobre memoria y responsabilidad.","g"],["Debate: Hiroshima y Nagasaki","un debate argumentado","Investigan posturas sobre el uso de la bomba atómica y debaten en formato parlamentario, fundamentando con evidencia.","k"]],aa:["A","G"]},
+4:{t:"Analizar las consecuencias de la Segunda Guerra Mundial, como la conformación de un orden mundial bipolar liderado por Estados Unidos y la URSS, el declive de Europa, el inicio de la descolonización y la creación de la ONU y la Declaración Universal de los Derechos Humanos.",k:"las consecuencias de la Segunda Guerra Mundial",c:["bipolaridad","superpotencias","descolonización","ONU","DUDH"],
+ f:[["Analizar","la conformación del orden bipolar y el declive europeo","¿Quiénes ganaron realmente la Segunda Guerra Mundial?"],["Explicar","el proceso de descolonización en Asia y África","¿Por qué los imperios europeos se desmoronaron después de 1945?"],["Valorar","la creación de la ONU y la Declaración Universal de los Derechos Humanos","¿Para qué crear una organización mundial después de la guerra?"]],
+ i:["Explican la conformación de un orden bipolar liderado por EE.UU. y la URSS.","Relacionan el debilitamiento de Europa con el inicio de la descolonización.","Describen los propósitos de la ONU y los principios de la Declaración Universal de los Derechos Humanos.","Evalúan la relevancia de la DUDH como respuesta a los crímenes de la guerra."],
+ a:[["Mapa de la descolonización","la elaboración de un mapa temático","Elaboran un mapa de Asia y África con las fechas de independencia y las metrópolis; identifican patrones espaciales y temporales.","d"],["La DUDH en mi vida","el análisis de artículos de la Declaración Universal","En grupos seleccionan artículos de la DUDH, los relacionan con los crímenes de la guerra que buscaron evitar y con situaciones actuales.","g"],["Infografía del nuevo orden","la elaboración de una infografía","Construyen una infografía con las consecuencias de la guerra: demográficas, territoriales, políticas y económicas.","l"]],aa:["A","E"]},
+5:{t:"Analizar la crisis del sistema parlamentario chileno y la reconstrucción del orden institucional a partir de la Constitución de 1925, considerando el fortalecimiento del Poder Ejecutivo, la separación de la Iglesia y el Estado y la incorporación de derechos sociales.",k:"la crisis del parlamentarismo y la Constitución de 1925",c:["régimen parlamentario","cuestión social","Constitución de 1925","presidencialismo"],
+ f:[["Analizar","la crisis del régimen parlamentario y la cuestión social","¿Por qué el parlamentarismo chileno no pudo resolver la cuestión social?"],["Explicar","la intervención militar de 1924–1925 y el fin del parlamentarismo","¿Qué papel jugaron los militares en el fin del parlamentarismo?"],["Caracterizar","la Constitución de 1925 y el fortalecimiento del Poder Ejecutivo","¿Qué cambió y qué se mantuvo con la Constitución de 1925?"]],
+ i:["Describen las características del régimen parlamentario chileno y las críticas que recibió.","Relacionan la cuestión social con la crisis del sistema político oligárquico.","Explican los principales cambios introducidos por la Constitución de 1925 (presidencialismo, separación Iglesia-Estado, derechos sociales).","Analizan fuentes de la época para identificar diagnósticos sobre la crisis."],
+ a:[["Diagnósticos del Centenario","el análisis de discursos y ensayos de la época","Leen fragmentos de autores del Centenario (Recabarren, Venegas, Mac Iver) e identifican los problemas diagnosticados y las soluciones propuestas.","g"],["Comparar constituciones","un cuadro comparativo de textos constitucionales","Comparan artículos de la Constitución de 1833 (reformada) y de 1925 sobre poderes del Estado, religión y derechos.","b"],["Línea de tiempo 1891–1932","la periodización de la crisis","Elaboran una línea de tiempo con los hitos de la crisis política (1891, ruido de sables, 1925, gobierno de Ibáñez, República Socialista, 1932).","a"]],aa:["E","G"]},
+6:{t:"Analizar las transformaciones económicas, políticas y sociales de Chile tras la Gran Depresión, considerando el fin del ciclo salitrero, el modelo de industrialización por sustitución de importaciones y la ampliación del rol del Estado en la economía (CORFO).",k:"las transformaciones de Chile tras la Gran Depresión",c:["Gran Depresión","ciclo salitrero","ISI","CORFO","Estado empresario"],
+ f:[["Explicar","el impacto de la Gran Depresión en Chile y el fin del ciclo salitrero","¿Por qué Chile fue uno de los países más afectados por la crisis de 1929?"],["Analizar","el modelo de industrialización por sustitución de importaciones","¿Por qué el Estado decidió producir lo que antes se importaba?"],["Evaluar","el rol de la CORFO y la ampliación de las funciones del Estado","¿Qué ganó y qué arriesgó Chile con un Estado empresario?"]],
+ i:["Explican los efectos de la Gran Depresión en la economía y la sociedad chilena.","Caracterizan el modelo ISI y el rol del Estado en el desarrollo económico.","Interpretan datos estadísticos sobre exportaciones, producción y empleo del período.","Evalúan logros y limitaciones del modelo de desarrollo hacia adentro."],
+ a:[["Gráficos de la crisis","el análisis de datos estadísticos","Analizan gráficos de exportaciones de salitre y cobre, desempleo e ingreso fiscal (1925–1935) y elaboran inferencias sobre el impacto de la crisis.","e"],["Empresas que construyeron Chile","una investigación breve en grupos","Investigan una empresa creada por CORFO (ENDESA, CAP, ENAP, IANSA) y presentan su aporte al desarrollo y su localización en un mapa.","i"],["¿Hacia adentro o hacia afuera?","una discusión socrática","Discuten con fuentes los argumentos a favor y en contra del modelo ISI y redactan una conclusión argumentada.","m"]],aa:["D","G"]},
+7:{t:"Evaluar el impacto de la irrupción de nuevos actores sociales (sectores medios, movimiento obrero, mujeres) y de la cultura de masas en la democratización de la sociedad chilena a mediados del siglo XX, considerando el sufragio femenino y la ampliación de la ciudadanía.",k:"los nuevos actores sociales y la democratización de Chile",c:["clase media","movimiento obrero","sufragio femenino","Frente Popular","democratización"],
+ f:[["Analizar","la irrupción de los sectores medios y el movimiento obrero en la política","¿Quiénes son los nuevos protagonistas de la política chilena del siglo XX?"],["Explicar","la lucha por el sufragio femenino y la ampliación de la ciudadanía","¿Por qué las mujeres chilenas votaron en una elección presidencial recién en 1952?"],["Relacionar","la cultura de masas con la democratización de la sociedad chilena","¿Cómo la radio, el cine y el fútbol cambiaron la sociedad chilena?"]],
+ i:["Identifican nuevos actores sociales y sus demandas a mediados del siglo XX.","Explican el proceso de obtención del sufragio femenino y el rol del MEMCH.","Relacionan la expansión de la educación, la cultura de masas y el aumento del electorado con la democratización.","Evalúan los alcances y límites de la democratización del período."],
+ a:[["Voces del MEMCH","el análisis de fuentes sobre el movimiento de mujeres","Analizan fragmentos de la revista La Mujer Nueva y otros documentos del MEMCH, identificando demandas y estrategias.","g"],["Gráfico del electorado","la interpretación de datos electorales","Construyen un gráfico de la evolución del número de votantes (1920–1970) y lo explican relacionándolo con las reformas electorales.","e"],["Podcast histórico","la producción de un podcast","En grupos producen un podcast de 3 minutos sobre un actor social (obreros, clase media, mujeres, jóvenes) usando al menos dos fuentes.","l"]],aa:["F","E"]},
+8:{t:"Analizar la Guerra Fría como un conflicto ideológico entre los bloques capitalista y socialista, que se manifestó en la política, la cultura, el deporte y las ciencias, y en conflictos armados en distintas regiones del mundo.",k:"la Guerra Fría",c:["Guerra Fría","bloques","carrera armamentista","carrera espacial","Muro de Berlín"],
+ f:[["Caracterizar","la Guerra Fría como enfrentamiento ideológico entre capitalismo y socialismo","¿Por qué se le llama «fría» a una guerra que tuvo tantos conflictos armados?"],["Analizar","los conflictos y crisis de la Guerra Fría (Berlín, Corea, Cuba, Vietnam)","¿Dónde se «calentó» la Guerra Fría?"],["Explicar","la competencia entre bloques en la cultura, el deporte y la ciencia","¿Cómo se enfrentaron las superpotencias en el espacio y en los Juegos Olímpicos?"]],
+ i:["Caracterizan la Guerra Fría como un conflicto ideológico, político, económico y militar.","Ubican espacialmente los bloques y los principales conflictos de la Guerra Fría.","Explican la competencia entre bloques en ámbitos como la carrera espacial, el deporte y la cultura.","Analizan propaganda de ambos bloques identificando sus visiones de mundo."],
+ a:[["Mapa del mundo bipolar","la elaboración de un mapa","Representan en un mapa mundial los bloques, las alianzas (OTAN, Pacto de Varsovia) y los conflictos calientes, con fechas y simbología.","d"],["Propaganda de ambos lados","el análisis comparado de propaganda","Comparan afiches, caricaturas y fragmentos de películas de EE.UU. y la URSS identificando estereotipos del adversario.","h"],["Crisis de los misiles","un juego de simulación","Simulan el comité de crisis de 1962 con roles de EE.UU., URSS y Cuba, tomando decisiones a partir de documentos desclasificados.","k"]],aa:["C","G"]},
+9:{t:"Reconocer las transformaciones de la sociedad occidental durante la Guerra Fría, como el crecimiento económico de posguerra, la sociedad de consumo, la expansión de los medios de comunicación de masas, los movimientos por los derechos civiles, la contracultura y los avances tecnológicos.",k:"las transformaciones de la sociedad occidental en la Guerra Fría",c:["Estado de Bienestar","sociedad de consumo","derechos civiles","contracultura","medios de comunicación"],
+ f:[["Explicar","el crecimiento económico de posguerra y la sociedad de consumo","¿Cómo cambió la vida cotidiana en los «treinta gloriosos»?"],["Analizar","los movimientos por los derechos civiles y la contracultura","¿Por qué los jóvenes de los años 60 cuestionaron el orden establecido?"],["Relacionar","los medios de comunicación de masas y la tecnología con la vida cotidiana","¿Qué cambió con la llegada de la televisión a los hogares?"]],
+ i:["Describen características de la sociedad de consumo y del Estado de Bienestar en Occidente.","Explican las demandas de los movimientos por los derechos civiles, feminista y estudiantil.","Relacionan la expansión de los medios de comunicación con transformaciones culturales.","Establecen continuidades y cambios entre la sociedad de los años 60 y la actual."],
+ a:[["Discursos que cambiaron el mundo","el análisis de discursos","Analizan fragmentos del discurso «I have a dream» y de otros movimientos; identifican demandas, destinatarios y estrategias.","g"],["Antes y después","una tabla de continuidad y cambio","Comparan publicidad, música y vida cotidiana de los años 50–60 con la actualidad mediante una tabla de continuidad y cambio.","b"],["Museo de los 60","la creación de una muestra","Montan una exposición de objetos, imágenes y música de la época con fichas que relacionen cada pieza con su contexto.","l"]],aa:["B","F"]},
+10:{t:"Caracterizar la movilización social en América Latina entre la revolución y la reforma, considerando la Revolución Cubana, la influencia de Estados Unidos (Alianza para el Progreso, Doctrina de Seguridad Nacional), los golpes de Estado y las dictaduras militares.",k:"América Latina entre revolución y reforma",c:["Revolución Cubana","Alianza para el Progreso","Doctrina de Seguridad Nacional","reforma","dictaduras"],
+ f:[["Analizar","la Revolución Cubana y su impacto en América Latina","¿Por qué la Revolución Cubana inspiró y atemorizó a América Latina?"],["Explicar","la influencia de EE.UU. en la región (Alianza para el Progreso y Doctrina de Seguridad Nacional)","¿Cómo intervino EE.UU. en América Latina durante la Guerra Fría?"],["Comparar","las vías de transformación latinoamericanas: revolución, reforma y dictaduras militares","¿Revolución o reforma?"]],
+ i:["Explican el impacto de la Revolución Cubana en la región.","Describen las estrategias de EE.UU. hacia América Latina durante la Guerra Fría.","Comparan proyectos de transformación revolucionarios y reformistas.","Caracterizan las dictaduras militares latinoamericanas y su relación con la Doctrina de Seguridad Nacional."],
+ a:[["Mapa de golpes y dictaduras","la elaboración de un mapa","Ubican en un mapa de América Latina los golpes de Estado y dictaduras (1954–1990) con fechas; identifican patrones temporales.","d"],["Dos caminos","el análisis comparado de fuentes","Contrastan discursos de Fidel Castro y de J. F. Kennedy sobre la Alianza para el Progreso, identificando visiones del desarrollo.","h"],["Ficha país","una investigación grupal","Cada grupo investiga un país (Cuba, Guatemala, Brasil, Argentina, Uruguay, Nicaragua) y presenta su proceso en el contexto de la Guerra Fría.","i"]],aa:["C","E"]},
+11:{t:"Analizar el fin de la Guerra Fría, considerando la crisis y caída de la URSS y de los socialismos reales, la expansión del neoliberalismo y la aceleración de la globalización.",k:"el fin de la Guerra Fría y la globalización",c:["perestroika","caída del Muro de Berlín","neoliberalismo","globalización","unipolaridad"],
+ f:[["Explicar","la crisis y caída de la URSS y los socialismos reales","¿Por qué se derrumbó la URSS sin una guerra?"],["Analizar","la expansión del neoliberalismo en las décadas de 1980 y 1990","¿Qué propuso el neoliberalismo frente al Estado de Bienestar?"],["Relacionar","el fin de la Guerra Fría con la aceleración de la globalización","¿Vivimos aún las consecuencias del fin de la Guerra Fría?"]],
+ i:["Explican los factores internos y externos de la caída de la URSS.","Caracterizan los principios del neoliberalismo y su expansión.","Relacionan el fin de la Guerra Fría con el proceso de globalización.","Identifican consecuencias del fin de la bipolaridad en el mundo actual."],
+ a:[["Noticiero 1989","la elaboración de un noticiero histórico","Producen un noticiero sobre la caída del Muro de Berlín con entrevistas simuladas a distintos actores.","l"],["Causas en capas","un organizador gráfico de multicausalidad","Clasifican las causas de la caída de la URSS (económicas, políticas, sociales, externas) en un diagrama de espina de pescado.","j"],["Globalización en mi mochila","el análisis de cadenas de producción","Rastrean el origen de objetos cotidianos y lo relacionan con la globalización posterior a la Guerra Fría.","e"]],aa:["C","D"]},
+12:{t:"Caracterizar la pobreza en Chile a mediados del siglo XX y explicar el impacto de la migración campo-ciudad en el crecimiento urbano, la marginalidad y el surgimiento de poblaciones y tomas de terreno.",k:"la pobreza y la migración campo-ciudad en Chile",c:["pobreza","migración campo-ciudad","poblaciones callampa","marginalidad","urbanización"],
+ f:[["Caracterizar","la pobreza en Chile a mediados del siglo XX","¿Cómo vivían los sectores populares chilenos a mediados del siglo XX?"],["Explicar","la migración campo-ciudad y el crecimiento urbano","¿Por qué miles de campesinos migraron a Santiago?"],["Analizar","el surgimiento de poblaciones callampa y las tomas de terreno","¿Cómo enfrentaron los pobladores la falta de vivienda?"]],
+ i:["Describen las condiciones de vida de los sectores populares (vivienda, salud, mortalidad infantil).","Explican causas y efectos de la migración campo-ciudad.","Interpretan datos censales sobre población urbana y rural.","Analizan testimonios de pobladores y la organización de las tomas de terreno."],
+ a:[["Censos que hablan","el análisis de datos censales","Construyen e interpretan gráficos de población urbana y rural (1940–1970) a partir de los censos.","e"],["La Victoria, 1957","el análisis de fuentes sobre la toma de La Victoria","Analizan testimonios, fotografías y prensa sobre la toma de La Victoria y otros campamentos.","g"],["Fotografía y memoria","el análisis de fotografías históricas","Analizan fotografías de época y archivos de prensa e infieren las condiciones de vida de los sectores populares.","j"]],aa:["F","I"]},
+13:{t:"Analizar la movilización de nuevos actores sociales en el Chile de los años sesenta (campesinos, pobladores, estudiantes, trabajadores) y las respuestas de los proyectos de la Democracia Cristiana y de la Unidad Popular, como la Reforma Agraria y la nacionalización del cobre.",k:"los proyectos de transformación de la DC y la UP",c:["Reforma Agraria","Revolución en Libertad","vía chilena al socialismo","nacionalización del cobre","promoción popular"],
+ f:[["Analizar","la movilización de campesinos, pobladores, estudiantes y trabajadores en los años sesenta","¿Qué exigían los nuevos actores sociales de los años sesenta?"],["Caracterizar","el proyecto de la Democracia Cristiana («Revolución en Libertad»)","¿Qué transformaciones impulsó el gobierno de Frei Montalva?"],["Caracterizar","el proyecto de la Unidad Popular («vía chilena al socialismo»)","¿En qué se diferenciaron los proyectos de la DC y la UP?"]],
+ i:["Identifican las demandas de los nuevos actores sociales de los años sesenta.","Describen las principales reformas de los gobiernos de Frei Montalva y Allende.","Comparan los proyectos de la DC y de la UP (Reforma Agraria, cobre, participación).","Analizan fuentes de diversas perspectivas sobre las transformaciones estructurales."],
+ a:[["Cuadro de proyectos globales","un cuadro comparativo","Comparan los proyectos de Alessandri, Frei y Allende (economía, propiedad, rol del Estado, alianzas).","h"],["Reforma Agraria en voces","el análisis de testimonios","Analizan testimonios de campesinos y propietarios sobre la Reforma Agraria identificando perspectivas.","h"],["Afiches de campaña","el análisis de propaganda electoral","Analizan afiches de las campañas presidenciales de 1964 y 1970 identificando proyectos y destinatarios.","g"]],aa:["B","E"]},
+14:{t:"Analizar la crisis de comienzos de la década de 1970, considerando la polarización política, la violencia, la crisis económica, la intervención extranjera y el debilitamiento de las instituciones democráticas.",k:"la crisis de comienzos de los años setenta",c:["polarización","crisis económica","inflación","desabastecimiento","intervención extranjera"],
+ f:[["Analizar","la polarización política y la violencia a comienzos de los años setenta","¿Por qué se volvió tan difícil el diálogo político en 1973?"],["Explicar","la crisis económica del período (inflación, desabastecimiento, mercado negro)","¿Cómo afectó la crisis económica la vida cotidiana?"],["Analizar","la intervención extranjera y el debilitamiento de las instituciones democráticas","¿Qué papel tuvo EE.UU. en la crisis chilena?"]],
+ i:["Explican la polarización política considerando los actores y sus posturas.","Interpretan datos económicos del período (inflación, PIB, salarios).","Analizan documentos desclasificados sobre la intervención extranjera.","Relacionan múltiples factores en la explicación de la crisis de la democracia."],
+ a:[["Prensa polarizada","el análisis comparado de prensa","Comparan portadas de diarios de distintas tendencias (El Mercurio, Clarín, El Siglo) sobre un mismo hecho de 1972–1973.","h"],["Inflación en datos","el análisis de indicadores económicos","Grafican la inflación y los salarios reales entre 1970 y 1973 y explican su impacto social.","e"],["Mapa de factores","un diagrama de multicausalidad","Elaboran un mapa conceptual que relacione factores políticos, económicos, sociales e internacionales de la crisis.","j"]],aa:["C","E"]},
+15:{t:"Comparar distintas interpretaciones historiográficas sobre las causas del golpe de Estado de 1973 y el quiebre de la democracia en Chile.",k:"las interpretaciones sobre el golpe de Estado de 1973",c:["golpe de Estado","quiebre democrático","historiografía","interpretación","multicausalidad"],
+ f:[["Identificar","los hechos del 11 de septiembre de 1973 y el quiebre de la democracia","¿Qué ocurrió el 11 de septiembre de 1973?"],["Comparar","interpretaciones historiográficas sobre las causas del golpe de Estado","¿Por qué los historiadores explican el golpe de maneras distintas?"],["Argumentar","una postura fundamentada sobre las causas del quiebre democrático","¿Fue inevitable el quiebre de la democracia?"]],
+ i:["Describen los hechos del golpe de Estado de 1973.","Identifican los argumentos centrales de distintas interpretaciones historiográficas.","Comparan interpretaciones reconociendo la evidencia que utilizan.","Elaboran una argumentación escrita fundamentada sobre las causas del quiebre democrático."],
+ a:[["Historiadores en diálogo","el análisis comparado de textos historiográficos","Comparan fragmentos de historiadores con distintas interpretaciones mediante una tabla: tesis, factores que privilegian y evidencia utilizada.","h"],["Fuentes del 11","el análisis de fuentes primarias","Analizan el último discurso de Salvador Allende, el Bando N° 1 de la Junta y fotografías del día, identificando perspectivas.","g"],["Ensayo argumentativo","la escritura argumentativa","Redactan un ensayo breve con tesis, argumentos y contraargumentos basados en al menos dos interpretaciones.","m"]],aa:["C","D"]},
+16:{t:"Explicar que durante la dictadura militar se suprimió el Estado de derecho y se violaron sistemáticamente los derechos humanos, y reconocer la labor de instituciones y organizaciones en su defensa, como la Vicaría de la Solidaridad.",k:"la supresión del Estado de derecho y las violaciones a los DD.HH.",c:["Estado de derecho","violaciones a los DD.HH.","Vicaría de la Solidaridad","memoria","detenidos desaparecidos"],
+ f:[["Explicar","la supresión del Estado de derecho durante la dictadura","¿Qué significa que se suprima el Estado de derecho?"],["Analizar","las violaciones sistemáticas a los derechos humanos","¿Cómo se documentaron las violaciones a los derechos humanos?"],["Valorar","el rol de las instituciones de defensa de los derechos humanos","¿Quiénes defendieron los derechos humanos durante la dictadura?"]],
+ i:["Explican medidas que suprimieron el Estado de derecho (clausura del Congreso, receso político, censura, estado de sitio).","Describen las violaciones sistemáticas a los derechos humanos a partir de los informes Rettig y Valech.","Reconocen la labor del Comité Pro Paz, la Vicaría de la Solidaridad y otras organizaciones.","Valoran la memoria y el respeto a los derechos humanos como base de la convivencia democrática."],
+ a:[["Sitios de memoria","el análisis de sitios de memoria","Exploran sitios de memoria (Museo de la Memoria y los Derechos Humanos, Villa Grimaldi) mediante recursos digitales y responden una guía.","g"],["Informes de verdad","el análisis de fragmentos de los informes Rettig y Valech","Analizan fragmentos de los informes identificando tipos de violaciones y responsabilidades institucionales.","g"],["Defensores","una investigación breve","Investigan a la Vicaría de la Solidaridad y otras organizaciones, y presentan su labor en una línea de tiempo.","i"]],aa:["A","E"]},
+17:{t:"Caracterizar el modelo económico neoliberal implementado durante la dictadura (privatizaciones, apertura comercial, reducción del rol del Estado) y evaluar sus efectos sociales.",k:"el modelo económico neoliberal",c:["neoliberalismo","Chicago Boys","privatización","apertura comercial","Estado subsidiario"],
+ f:[["Caracterizar","el modelo económico neoliberal implementado en dictadura","¿Qué cambió en la economía chilena a partir de 1975?"],["Explicar","las privatizaciones, la apertura comercial y el Estado subsidiario","¿Qué servicios dejó de entregar el Estado?"],["Evaluar","los efectos sociales del modelo neoliberal","¿Quiénes ganaron y quiénes perdieron con las reformas económicas?"]],
+ i:["Describen los principios del modelo neoliberal y su implementación en Chile.","Explican reformas como las privatizaciones, el plan laboral, el sistema de AFP y la municipalización de la educación.","Interpretan indicadores económicos y sociales (desempleo, pobreza, crecimiento) del período.","Evalúan los efectos sociales del modelo considerando distintas perspectivas."],
+ a:[["Indicadores en disputa","el análisis de datos económicos y sociales","Analizan gráficos de crecimiento, desempleo y pobreza entre 1973 y 1990 y discuten sus interpretaciones.","e"],["Las siete modernizaciones","el análisis de reformas","En grupos analizan una modernización (laboral, previsional, salud, educación, etc.) y presentan sus cambios y efectos.","j"],["Antes y después del modelo","una tabla de continuidad y cambio","Comparan el rol del Estado antes y después de 1973 en áreas clave.","b"]],aa:["C","I"]},
+18:{t:"Analizar la institucionalidad establecida en la Constitución de 1980 y reconocer sus continuidades y cambios en el Chile actual.",k:"la Constitución de 1980 y su institucionalidad",c:["Constitución de 1980","democracia protegida","plebiscito","reformas constitucionales","institucionalidad"],
+ f:[["Analizar","el origen y la elaboración de la Constitución de 1980","¿Cómo y en qué contexto se aprobó la Constitución de 1980?"],["Caracterizar","la institucionalidad establecida por la Constitución de 1980","¿Qué características tenía la «democracia protegida»?"],["Identificar","continuidades y cambios de la institucionalidad de 1980 en el Chile actual","¿Qué permanece de la Constitución de 1980 hoy?"]],
+ i:["Describen el contexto de elaboración y aprobación de la Constitución de 1980.","Caracterizan instituciones como el Consejo de Seguridad Nacional, los senadores designados y el sistema binominal.","Identifican las principales reformas constitucionales posteriores (1989, 2005 y otras).","Analizan continuidades y cambios institucionales hasta el presente."],
+ a:[["Constitución comentada","el análisis de artículos constitucionales","Analizan artículos originales de 1980 y su redacción actual, identificando cambios.","b"],["Línea de reformas","la construcción de una línea de tiempo","Construyen una línea de tiempo de las reformas constitucionales desde 1989 hasta la actualidad.","a"],["Foro: institucionalidad y democracia","un foro de discusión","Discuten qué elementos de la institucionalidad fortalecen o limitan la democracia.","k"]],aa:["E","C"]},
+19:{t:"Explicar los factores que incidieron en el proceso de recuperación de la democracia durante la década de 1980, como la crisis económica de 1982, las protestas nacionales, la rearticulación de la oposición, el rol de la Iglesia y la presión internacional.",k:"el camino hacia la recuperación de la democracia",c:["crisis de 1982","protestas nacionales","oposición","Iglesia católica","presión internacional"],
+ f:[["Explicar","la crisis económica de 1982 y sus efectos","¿Por qué la crisis de 1982 debilitó a la dictadura?"],["Analizar","las protestas nacionales y la rearticulación de la oposición","¿Cómo se organizó la oposición a la dictadura?"],["Analizar","el rol de la Iglesia y la comunidad internacional en la recuperación democrática","¿Qué actores presionaron por el retorno a la democracia?"]],
+ i:["Explican el impacto de la crisis económica de 1982.","Describen las protestas nacionales y la rearticulación de los partidos políticos.","Reconocen el rol de la Iglesia y de la comunidad internacional.","Relacionan múltiples factores que incidieron en el camino hacia la democracia."],
+ a:[["Voces de la protesta","el análisis de fuentes diversas","Analizan fotografías, canciones y testimonios de las protestas de 1983–1986.","g"],["Factores en red","un organizador de multicausalidad","Construyen una red de factores (económicos, sociales, políticos, internacionales) y jerarquizan su importancia.","j"],["Entrevista intergeneracional","una entrevista a un familiar o vecino","Entrevistan a una persona que vivió los años 80 y contrastan su relato con fuentes históricas.","i"]],aa:["E","G"]},
+20:{t:"Analizar el proceso de transición a la democracia, considerando el plebiscito de 1988, los acuerdos políticos y reformas constitucionales, las elecciones de 1989 y las políticas de verdad, justicia y reparación.",k:"la transición a la democracia",c:["plebiscito de 1988","transición","reformas de 1989","Concertación","verdad y reparación"],
+ f:[["Analizar","el plebiscito de 1988 y las negociaciones políticas","¿Qué hizo posible el triunfo del «No»?"],["Explicar","las reformas constitucionales y las elecciones de 1989","¿Qué se negoció para la transición?"],["Valorar","las políticas de verdad, justicia y reparación","¿Cómo enfrentó Chile las violaciones a los derechos humanos después de 1990?"]],
+ i:["Explican el plebiscito de 1988 y sus resultados.","Describen los acuerdos y reformas que permitieron la transición.","Caracterizan las políticas de verdad, justicia y reparación (informes Rettig y Valech).","Evalúan alcances y limitaciones de la transición."],
+ a:[["Franja del Sí y del No","el análisis de propaganda audiovisual","Analizan fragmentos de la franja televisiva de 1988 comparando mensajes, recursos y destinatarios.","h"],["Resultados del plebiscito","el análisis de datos electorales","Interpretan los resultados por región en mapas y gráficos.","d"],["Mesa redonda: la transición","una mesa redonda","Discuten si la transición fue un proceso exitoso, fundamentando con fuentes.","k"]],aa:["E","A"]},
+21:{t:"Analizar la sociedad chilena posterior a la recuperación de la democracia, considerando los cambios en la estructura social, el acceso a bienes, la educación y el trabajo, y las demandas de grupos históricamente discriminados.",k:"la sociedad chilena desde 1990",c:["estructura social","consumo","educación","pueblos indígenas","grupos discriminados"],
+ f:[["Analizar","los cambios en la estructura social y el acceso a bienes desde 1990","¿Cómo cambió la sociedad chilena desde 1990?"],["Analizar","los cambios en la educación y el trabajo","¿Más educación significa más oportunidades?"],["Explicar","las demandas de grupos históricamente discriminados","¿Qué grupos han exigido reconocimiento en el Chile actual?"]],
+ i:["Describen cambios en la estructura social chilena desde 1990.","Interpretan datos sobre consumo, educación y trabajo (CASEN, censos).","Explican demandas de pueblos indígenas, mujeres, diversidades sexuales, migrantes y personas con discapacidad.","Evalúan avances y desafíos en el reconocimiento de grupos discriminados."],
+ a:[["Chile en cifras","el análisis de datos de la encuesta CASEN","Analizan series de datos sobre pobreza, escolaridad y acceso a bienes entre 1990 y la actualidad.","e"],["Demandas y respuestas","una investigación grupal","Investigan un movimiento social (indígena, feminista, estudiantil, de diversidades) y la respuesta institucional que obtuvo.","i"],["Galería de cambios","una galería de aprendizaje","Construyen paneles que muestren un cambio y una continuidad en la sociedad chilena.","b"]],aa:["B","F"]},
+22:{t:"Analizar el concepto de derechos humanos, considerando sus características (universales, inalienables, indivisibles, imprescriptibles) y la institucionalidad nacional e internacional que los resguarda.",k:"los derechos humanos y su institucionalidad",c:["derechos humanos","universalidad","inalienabilidad","INDH","sistema interamericano"],
+ f:[["Explicar","el concepto de derechos humanos y sus características","¿Qué hace que un derecho sea «humano»?"],["Analizar","la institucionalidad nacional que resguarda los derechos humanos","¿A quién acudir si se vulneran mis derechos?"],["Analizar","los sistemas internacionales de protección de derechos humanos","¿Por qué un tribunal internacional puede juzgar a un Estado?"]],
+ i:["Explican el concepto de derechos humanos y sus características.","Identifican instituciones nacionales que resguardan los derechos humanos (INDH, Defensoría de la Niñez, tribunales).","Describen el funcionamiento de los sistemas interamericano y universal de protección.","Aplican el concepto de derechos humanos al análisis de casos."],
+ a:[["Casos para analizar","el estudio de casos","Analizan casos reales o simulados de vulneración de derechos e identifican qué derecho está en juego y qué institución intervendría.","j"],["Mapa de instituciones","un organizador gráfico","Construyen un esquema de instituciones nacionales e internacionales con sus funciones.","l"],["Campaña de derechos","una campaña de difusión","Diseñan afiches o publicaciones que difundan un derecho y a quién acudir si se vulnera.","l"]],aa:["A","E"]},
+23:{t:"Explicar los elementos que constituyen un Estado de derecho (Constitución, separación de poderes, legalidad, igualdad ante la ley, respeto a los derechos humanos) y debatir sobre su perfeccionamiento y los riesgos que lo amenazan.",k:"el Estado de derecho",c:["Estado de derecho","separación de poderes","igualdad ante la ley","probidad","corrupción"],
+ f:[["Explicar","los elementos que constituyen un Estado de derecho","¿Qué hace que un Estado sea «de derecho»?"],["Analizar","los mecanismos de control del poder y de probidad","¿Quién controla a quienes nos gobiernan?"],["Debatir","los riesgos y desafíos del Estado de derecho en la actualidad","¿Qué amenaza hoy al Estado de derecho?"]],
+ i:["Explican los elementos del Estado de derecho (Constitución, separación de poderes, legalidad, igualdad ante la ley, DD.HH.).","Identifican mecanismos de control y probidad (Contraloría, Tribunal Constitucional, transparencia).","Analizan situaciones que ponen en riesgo el Estado de derecho.","Debaten propuestas para perfeccionar el Estado de derecho."],
+ a:[["Esquema de poderes","un organizador gráfico","Elaboran un esquema de los poderes del Estado y los órganos autónomos con sus mecanismos de control.","l"],["Noticias bajo la lupa","el análisis de prensa actual","Analizan noticias recientes e identifican qué elemento del Estado de derecho está en juego.","g"],["Debate parlamentario","un debate","Debaten una propuesta para fortalecer la probidad o la transparencia.","k"]],aa:["E","I"]},
+24:{t:"Debatir sobre los desafíos pendientes de la sociedad chilena, como la superación de la pobreza, la reducción de la desigualdad y el desarrollo sustentable, proponiendo acciones ciudadanas.",k:"los desafíos pendientes del país",c:["pobreza","desigualdad","desarrollo sustentable","políticas públicas","participación ciudadana"],
+ f:[["Analizar","la pobreza y la desigualdad como desafíos del país","¿Por qué persisten la pobreza y la desigualdad en Chile?"],["Analizar","el desarrollo sustentable y los desafíos medioambientales","¿Es posible crecer sin dañar el medio ambiente?"],["Proponer","acciones ciudadanas frente a los desafíos pendientes","¿Qué podemos hacer como ciudadanos?"]],
+ i:["Explican la pobreza y la desigualdad usando indicadores (CASEN, coeficiente de Gini).","Analizan conflictos socioambientales y el concepto de desarrollo sustentable.","Debaten sobre políticas públicas para enfrentar los desafíos del país.","Proponen acciones ciudadanas fundamentadas."],
+ a:[["Desigualdad en datos","el análisis de indicadores","Analizan datos de ingresos, coeficiente de Gini y pobreza multidimensional por región.","e"],["Conflicto socioambiental","el estudio de caso","Analizan un conflicto socioambiental (por ejemplo, Quintero-Puchuncaví) identificando actores e intereses.","j"],["Proyecto ciudadano","un proyecto de acción","Diseñan una propuesta de acción para un problema de su comunidad.","i"]],aa:["H","I"]},
+25:{t:"Reconocer la diversidad social y cultural de Chile y evaluar los desafíos que plantea un mundo globalizado para promover la inclusión y evitar todo tipo de discriminación.",k:"la diversidad y la no discriminación",c:["diversidad","multiculturalidad","discriminación","inclusión","globalización"],
+ f:[["Reconocer","la diversidad social y cultural de Chile","¿Qué hace diverso a Chile?"],["Analizar","las formas de discriminación y sus efectos","¿Cómo se manifiesta la discriminación en nuestra vida diaria?"],["Evaluar","los desafíos de un mundo globalizado para la inclusión","¿Cómo convivir en una sociedad diversa?"]],
+ i:["Reconocen expresiones de diversidad (cultural, étnica, de género, religiosa, migrante) en Chile.","Identifican formas de discriminación y sus efectos.","Analizan el marco legal contra la discriminación (Ley 20.609).","Proponen acciones para una convivencia inclusiva."],
+ a:[["Mapa de la diversidad","el análisis de datos censales","Analizan datos de pueblos indígenas y población migrante por región y los representan en mapas.","d"],["Situaciones de discriminación","el estudio de casos","Analizan casos y proponen respuestas basadas en la Ley 20.609.","j"],["Campaña inclusiva","una campaña escolar","Diseñan una campaña para promover la inclusión en el establecimiento.","l"]],aa:["B","A"]}
+};
+const EJE=n=>n>=22?"Formación ciudadana":"Historia";
+
+const OAH={a:"Establecer y fundamentar periodizaciones históricas mediante líneas de tiempo, reconociendo sucesión y simultaneidad.",b:"Analizar elementos de continuidad y cambio entre períodos y procesos.",c:"Analizar procesos considerando distintas duraciones (corta, mediana y larga) y ritmos.",d:"Representar la distribución espacial de fenómenos mediante mapas y herramientas tecnológicas.",e:"Analizar datos e información geográfica para elaborar inferencias y predicciones.",f:"Seleccionar fuentes considerando su confiabilidad, relevancia y diversidad.",g:"Evaluar críticamente fuentes e información como evidencia para argumentar.",h:"Comparar distintas interpretaciones historiográficas y geográficas.",i:"Investigar: formular preguntas e hipótesis, analizar información y comunicar resultados citando fuentes.",j:"Pensar críticamente: preguntar, inferir, cuestionar prejuicios, identificar sesgos y analizar multicausalidad.",k:"Participar en debates y conversaciones, argumentando y buscando acuerdos.",l:"Comunicar resultados de investigación con estructura lógica y evidencia pertinente.",m:"Elaborar argumentaciones escritas usando conceptos históricos y geográficos."};
+const OAHshort={a:"Periodización",b:"Continuidad y cambio",c:"Duraciones y ritmos",d:"Mapas",e:"Datos e inferencias",f:"Selección de fuentes",g:"Fuentes como evidencia",h:"Interpretaciones",i:"Investigación",j:"Pensamiento crítico",k:"Debate y diálogo",l:"Comunicación",m:"Argumentación escrita"};
+const OAA={A:["Respetar y defender la igualdad de derechos esenciales de todas las personas.","se promueve al analizar situaciones en que se vulneraron derechos y reconocer la dignidad de todas las personas."],B:["Respetar y valorar la diversidad cultural, religiosa y étnica, y el diálogo.","se promueve al escuchar y considerar perspectivas distintas a la propia durante el trabajo con fuentes y la discusión."],C:["Pensar en forma autónoma y reflexiva, con disposición a la crítica y la autocrítica.","se promueve al formular preguntas, contrastar fuentes y revisar críticamente las propias ideas."],D:["Valorar el aporte de las ciencias sociales a la comprensión de la realidad.","se promueve al usar conceptos y métodos de las ciencias sociales para explicar fenómenos actuales."],E:["Valorar la democracia y la ciudadanía activa, solidaria y responsable.","se promueve al valorar el diálogo, la participación y los acuerdos como formas de resolver conflictos."],F:["Valorar la convivencia pacífica y la igualdad entre hombres y mujeres.","se promueve al establecer normas de trabajo colaborativo que aseguren una participación equitativa."],G:["Interesarse por el pasado y valorar el conocimiento histórico para comprender el presente.","se promueve al relacionar los procesos estudiados con situaciones del presente."],H:["Desarrollar actitudes favorables a la protección del medio ambiente y al desarrollo sustentable.","se promueve al vincular los procesos estudiados con su impacto en el medio ambiente y el territorio."],I:["Demostrar una actitud propositiva, con responsabilidad social y compromiso con el bien común.","se promueve al proponer soluciones creativas y responsables a problemas de la comunidad."],J:["Usar las tecnologías de la información de forma responsable, reconociendo el trabajo de otros.","se promueve al citar las fuentes utilizadas y usar la tecnología de manera ética."]};
+const OAAshort={A:"Igualdad de derechos",B:"Diversidad y diálogo",C:"Pensamiento autónomo",D:"Valor de las ciencias sociales",E:"Democracia y ciudadanía",F:"Convivencia e igualdad de género",G:"Interés por el pasado",H:"Medio ambiente",I:"Actitud propositiva",J:"Uso responsable de TIC"};
+
+const NEE={
+ dua:{n:"DUA para todo el curso",d:"Diseño Universal para el Aprendizaje",s:["Presentar la información en múltiples formatos (texto, imagen, audio o video) y entregar un glosario con los conceptos clave: {c}.","Ofrecer opciones para demostrar lo aprendido: respuesta escrita, oral, esquema o dibujo explicativo.","Proporcionar organizadores gráficos y modelar el primer ejemplo de la actividad antes del trabajo autónomo.","Formar grupos heterogéneos con roles definidos (lector, secretario, vocero, controlador del tiempo)."]},
+ tea:{n:"Condición del espectro autista (TEA)",d:"Anticipación y estructura",s:["Anticipar la estructura de la clase con una agenda visual en la pizarra y avisar los cambios de actividad.","Entregar instrucciones breves, concretas y por escrito; asignar un rol definido en el trabajo grupal.","Ofrecer la opción de trabajo individual o con una pareja estable y un espacio de regulación si lo requiere."]},
+ tdah:{n:"TDAH",d:"Atención y autorregulación",s:["Segmentar la actividad en pasos cortos con tiempos visibles y una lista de verificación.","Ubicar al estudiante cerca del docente y asignarle responsabilidades activas (repartir material, registrar ideas).","Incorporar pausas activas breves y monitorear el avance cada 10 a 15 minutos."]},
+ dea:{n:"Dificultades específicas del aprendizaje (DEA)",d:"Lectura y escritura",s:["Entregar textos con letra ampliada, interlineado amplio e ideas principales destacadas; permitir lectura en voz alta o en audio.","Reducir la extensión de las fuentes escritas sin alterar el objetivo y otorgar tiempo adicional.","Permitir respuestas orales o en esquema en lugar de producción escrita extensa."]},
+ di:{n:"Discapacidad intelectual / FIL",d:"Ajuste de complejidad",s:["Priorizar una fuente principal con preguntas graduadas (literales, inferenciales y de opinión).","Apoyar con imágenes, ejemplos concretos y un glosario ilustrado de {c}.","Ajustar el nivel de logro esperado del indicador según el PACI del estudiante, si corresponde."]},
+ sens:{n:"Discapacidad sensorial (visual o auditiva)",d:"Acceso a la información",s:["Describir verbalmente imágenes y mapas; ofrecer el material en macrotipo o en formato digital accesible.","Usar videos subtitulados y apoyar las instrucciones orales con texto escrito.","Ubicar al estudiante donde tenga buena visibilidad y audición de la clase."]},
+ ext:{n:"Estudiantes extranjeros no hispanohablantes",d:"Apoyo lingüístico",s:["Entregar un glosario bilingüe o con imágenes de los conceptos {c}.","Asignar un compañero tutor y priorizar apoyos visuales (mapas, líneas de tiempo, imágenes).","Vincular el contenido con la historia del país de origen del estudiante cuando sea pertinente."]},
+ ac:{n:"Altas capacidades",d:"Profundización",s:["Proponer una pregunta de desafío o una fuente historiográfica adicional para profundizar.","Asignar el rol de experto o moderador en la discusión grupal.","Invitar a elaborar un producto de mayor complejidad (ensayo breve con contraargumentación)."]}
+};
+
+const INSTR={
+ rub_ensayo:{n:"Rúbrica de ensayo argumentativo",kind:"rubrica",d:"Los estudiantes redactan un ensayo argumentativo que responde a una pregunta problematizadora, usando al menos dos fuentes.",x:["Formula una tesis clara y pertinente a la pregunta.","Fundamenta con evidencia de fuentes primarias o secundarias y las cita.","Considera y responde a un contraargumento.","Redacta con coherencia, cohesión y uso adecuado de conceptos disciplinares."]},
+ prueba:{n:"Prueba escrita",kind:"spec",d:"Prueba escrita con ítems de selección múltiple, análisis de fuentes y una pregunta de desarrollo, construida a partir de una tabla de especificaciones alineada a los indicadores.",x:[]},
+ rub_oral:{n:"Rúbrica de exposición oral",kind:"rubrica",d:"Presentación grupal de 5 a 7 minutos con apoyo visual sobre un tema estudiado, seguida de preguntas del curso.",x:["Organiza la exposición con introducción, desarrollo y conclusión.","Utiliza apoyo visual pertinente y cita las fuentes.","Responde preguntas con fundamentos."]},
+ rub_debate:{n:"Rúbrica de debate",kind:"rubrica",d:"Debate formal en equipos con posturas asignadas: argumentación, réplica y conclusión.",x:["Presenta argumentos fundamentados en evidencia.","Refuta los argumentos contrarios con respeto.","Respeta los turnos y las normas del debate."]},
+ escala:{n:"Escala de apreciación (trabajo de investigación)",kind:"escala",d:"Trabajo de investigación en grupos que culmina en un informe o póster, evaluado por etapas.",x:["Formula una pregunta de investigación pertinente.","Selecciona fuentes confiables y diversas.","Comunica conclusiones con estructura lógica y citas."]},
+ cotejo:{n:"Lista de cotejo (producto)",kind:"cotejo",d:"Lista de cotejo para verificar desempeños en un producto (infografía, mapa, línea de tiempo u organizador).",x:["Entrega el producto en el plazo acordado.","Cita las fuentes utilizadas."]},
+ portafolio:{n:"Portafolio de evidencias",kind:"cotejo",d:"Recopilación de los productos de las clases (fichas, tickets, organizadores) con una reflexión final sobre el propio aprendizaje.",x:["Incluye todas las evidencias solicitadas.","Presenta una reflexión sobre su proceso de aprendizaje."]}
+};
+const FORM={
+ ticket:{n:"Ticket de salida",c:(q,k)=>`Ticket de salida: responden por escrito «${q}» usando al menos un concepto clave. El docente revisa las respuestas para retroalimentar la clase siguiente.`},
+ r321:{n:"Rutina 3-2-1",c:(q,k)=>`Rutina 3-2-1: anotan 3 ideas aprendidas, 2 conceptos clave y 1 pregunta pendiente sobre ${k}. Se comparten algunas respuestas.`},
+ semaforo:{n:"Semáforo de aprendizaje",c:(q,k)=>`Semáforo de aprendizaje: cada estudiante se autoevalúa respecto del objetivo (verde, amarillo o rojo) y justifica su elección en una frase. Se retoman los «rojos» al inicio de la clase siguiente.`},
+ abcd:{n:"Tarjetas ABCD",c:(q,k)=>`Preguntas de selección múltiple con tarjetas ABCD sobre ${k}; el docente identifica errores frecuentes y los aclara en el momento.`},
+ pizarras:{n:"Pizarras individuales",c:(q,k)=>`Pizarras individuales: responden «${q}» en una frase y la muestran simultáneamente; se retroalimenta en el momento.`}
+};
+const RES={a:"Papel kraft o plantilla de línea de tiempo",b:"Tabla de continuidad y cambio",c:"Esquema de duraciones",d:"Mapas mudos y atlas",e:"Gráficos y tablas de datos impresos o digitales",f:"Dossier de fuentes",g:"Dossier de fuentes primarias y guía de análisis",h:"Textos historiográficos y tabla comparativa",i:"Pauta de investigación y acceso a internet",j:"Organizador gráfico",k:"Pauta de debate y roles",l:"Materiales para el producto (cartulinas, dispositivos)",m:"Pauta de escritura argumentativa"};
+const MODES={clase:"Clase a clase",semanal:"Semanal",mensual:"Mensual",unidad:"Por unidad"};
+
+/* ============ ESTADO ============ */
+const S={sel:new Set([1,2]),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,
+ mom:{diag:true,form:true,sum:true},instr:"rub_ensayo",formStrat:"ticket",oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",
+ datos:{esc:"",doc:"",curso:"2° Medio A",anio:"2027",inicio:""},q:""};
+try{const raw=localStorage.getItem("plan-hgcs2m");if(raw){const o=JSON.parse(raw);
+ Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:""});}}catch(e){}
+function save(){try{localStorage.setItem("plan-hgcs2m",JSON.stringify({...S,sel:[...S.sel],nee:[...S.nee],oah:S.oah?[...S.oah]:null,oaa:S.oaa?[...S.oaa]:null}))}catch(e){}}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const selArr=()=>[...S.sel].sort((a,b)=>a-b);
+const ucolor=id=>`var(--u${id})`;
+function suggOAH(){const s=new Set();selArr().forEach(n=>OA[n].a.forEach(a=>s.add(a[3])));return s}
+function suggOAA(){const s=new Set();selArr().forEach(n=>OA[n].aa.forEach(x=>s.add(x)));return s}
+const curOAH=()=>S.oah||suggOAH();
+const curOAA=()=>S.oaa||suggOAA();
+function suggWeeks(){let w=0;UNITS.forEach(u=>{const k=u.oas.filter(n=>S.sel.has(n)).length;if(k)w+=Math.ceil(u.weeks*k/u.oas.length)});return Math.max(1,w)}
+
+/* ============ LISTA DE OA ============ */
+function renderOAList(){
+ const q=S.q.trim().toLowerCase();const box=$("#oalist");let h="";
+ UNITS.forEach(u=>{
+  const items=u.oas.filter(n=>!q||(OA[n].t+" "+OA[n].c.join(" ")+" oa "+n).toLowerCase().includes(q));
+  if(!items.length)return;
+  const all=u.oas.every(n=>S.sel.has(n));
+  h+=`<div class="unit" style="--uc:${ucolor(u.id)}"><div class="unit-h"><div class="ut"><div class="un">Unidad ${u.id}</div><div class="uname">${esc(u.name)}</div></div><button type="button" class="btn-mini" data-unit="${u.id}">${all?"Quitar unidad":"Toda la unidad"}</button></div>`;
+  items.forEach(n=>{const on=S.sel.has(n);
+   h+=`<label class="oa${on?" sel":""}" style="--uc:${ucolor(u.id)}"><input type="checkbox" id="oa-${n}" data-oa="${n}" ${on?"checked":""}><span class="num">OA ${n}</span><span class="txt">${esc(OA[n].t)}<span class="eje">· ${EJE(n)}</span></span></label>`});
+  h+=`</div>`});
+ box.innerHTML=h||`<div class="empty"><strong>Sin resultados</strong>Prueba con otra palabra clave.</div>`;
+ $("#oa-count").textContent=`${S.sel.size} seleccionado${S.sel.size===1?"":"s"}`;
+}
+$("#oalist").addEventListener("change",e=>{const n=+e.target.dataset.oa;if(!n)return;e.target.checked?S.sel.add(n):S.sel.delete(n);update()});
+$("#oalist").addEventListener("click",e=>{const b=e.target.closest("[data-unit]");if(!b)return;const u=UNITS.find(x=>x.id==b.dataset.unit);const all=u.oas.every(n=>S.sel.has(n));u.oas.forEach(n=>all?S.sel.delete(n):S.sel.add(n));update()});
+$("#q").addEventListener("input",e=>{S.q=e.target.value;renderOAList()});
+$("#clear").addEventListener("click",()=>{S.sel.clear();S.oah=null;S.oaa=null;update()});
+
+/* ============ PANEL DE OPCIONES ============ */
+function renderCfg(){
+ const box=$("#cfg");
+ if(!S.sel.size){box.innerHTML=`<div class="empty"><strong>Selecciona al menos un OA</strong>Al marcar un objetivo se despliegan las opciones de tiempo, evaluación, habilidades, actitudes y adecuaciones.</div>`;return}
+ const tags=selArr().map(n=>`<span class="tag" style="--uc:${ucolor(unitOf(n).id)}"><b>OA ${n}</b> · U${unitOf(n).id}</span>`).join("");
+ let tf="";
+ const cps=`<div class="field"><label for="f-cps">Clases por semana</label><select id="f-cps">${[1,2,3,4].map(v=>`<option ${S.cps==v?"selected":""}>${v}</option>`).join("")}</select></div>`;
+ const dur=`<div class="field"><label for="f-dur">Minutos por clase</label><select id="f-dur">${[45,60,80,90].map(v=>`<option value="${v}" ${S.dur==v?"selected":""}>${v} min</option>`).join("")}</select></div>`;
+ if(S.mode==="clase")tf=`<div class="field"><label for="f-n">N° de clases</label><input type="number" id="f-n" min="1" max="40" value="${S.nClases}"></div>${cps}${dur}`;
+ if(S.mode==="semanal")tf=`<div class="field"><label for="f-sem">N° de semanas</label><input type="number" id="f-sem" min="1" max="20" value="${S.semanas}"></div>${cps}${dur}`;
+ if(S.mode==="mensual")tf=`<div class="field"><label for="f-mes">N° de meses</label><input type="number" id="f-mes" min="1" max="10" value="${S.meses}"></div>${cps}${dur}`;
+ if(S.mode==="unidad")tf=`<div class="field"><label for="f-semu">Semanas de la unidad</label><input type="number" id="f-semu" min="1" max="40" value="${S.semU??suggWeeks()}"></div>${cps}${dur}`;
+ const total=totalClasses();
+ const hintU=S.mode==="unidad"?` Sugerido según el Programa: <b>${suggWeeks()} semanas</b>.`:"";
+ const oah=curOAH(),oaa=curOAA();
+ box.innerHTML=`
+ <div class="summary">${tags}</div>
+ <div class="sec"><h3><b>2</b> Temporalidad</h3>
+  <div class="seg" role="group" aria-label="Tipo de planificación">${Object.entries(MODES).map(([k,v])=>`<button type="button" data-mode="${k}" aria-pressed="${S.mode===k}">${v}</button>`).join("")}</div>
+  <div class="fields">${tf}</div>
+  <div class="hint">Total: <b>${total} clases</b> de ${S.dur} min para ${S.sel.size} OA.${hintU}</div>
+ </div>
+ <div class="sec"><h3><b>3</b> Evaluación</h3>
+  <div class="chips" role="group" aria-label="Momentos de evaluación">
+   ${[["diag","Diagnóstica"],["form","Formativa"],["sum","Sumativa"]].map(([k,v])=>`<button type="button" class="chip" data-mom="${k}" aria-pressed="${S.mom[k]}">${v}</button>`).join("")}
+  </div>
+  <div class="fields">
+   <div class="field"><label for="f-form">Estrategia formativa (cierre)</label><select id="f-form" ${S.mom.form?"":"disabled"}>${Object.entries(FORM).map(([k,v])=>`<option value="${k}" ${S.formStrat===k?"selected":""}>${v.n}</option>`).join("")}</select></div>
+   <div class="field"><label for="f-instr">Instrumento sumativo</label><select id="f-instr" ${S.mom.sum?"":"disabled"}>${Object.entries(INSTR).map(([k,v])=>`<option value="${k}" ${S.instr===k?"selected":""}>${v.n}</option>`).join("")}</select></div>
+  </div>
+ </div>
+ <div class="sec"><h3><b>4</b> Habilidades y actitudes</h3>
+  <div class="lab">Habilidades (OAH) ${S.oah?`· <button type="button" class="btn-mini" data-reset="oah">Volver a sugeridas</button>`:"· sugeridas según los OA"}</div>
+  <div class="chips">${Object.keys(OAH).map(k=>`<button type="button" class="chip" data-oah="${k}" aria-pressed="${oah.has(k)}" title="${esc(OAH[k])}"><span class="k">${k}</span>${OAHshort[k]}</button>`).join("")}</div>
+  <div class="lab">Actitudes (OAA) ${S.oaa?`· <button type="button" class="btn-mini" data-reset="oaa">Volver a sugeridas</button>`:"· sugeridas según los OA"}</div>
+  <div class="chips">${Object.keys(OAA).map(k=>`<button type="button" class="chip" data-oaa="${k}" aria-pressed="${oaa.has(k)}" title="${esc(OAA[k][0])}"><span class="k">${k}</span>${OAAshort[k]}</button>`).join("")}</div>
+ </div>
+ <div class="sec"><h3><b>5</b> Adecuaciones</h3>
+  <div class="checks">${Object.entries(NEE).map(([k,v])=>`<label class="check"><input type="checkbox" id="nee-${k}" data-nee="${k}" ${S.nee.has(k)?"checked":""}><span>${v.n}<small>${v.d}</small></span></label>`).join("")}</div>
+  <div class="field"><label for="f-note">Nota adicional para adecuaciones (opcional)</label><textarea id="f-note" placeholder="Ej.: 2 estudiantes con PIE; un estudiante con PACI en lenguaje">${esc(S.neeNote)}</textarea></div>
+ </div>
+ <div class="sec"><h3><b>6</b> Datos del documento</h3>
+  <div class="fields">
+   <div class="field"><label for="d-esc">Establecimiento</label><input type="text" id="d-esc" data-d="esc" value="${esc(S.datos.esc)}"></div>
+   <div class="field"><label for="d-doc">Docente</label><input type="text" id="d-doc" data-d="doc" value="${esc(S.datos.doc)}"></div>
+   <div class="field"><label for="d-curso">Curso</label><input type="text" id="d-curso" data-d="curso" value="${esc(S.datos.curso)}"></div>
+   <div class="field"><label for="d-anio">Año</label><input type="text" id="d-anio" data-d="anio" value="${esc(S.datos.anio)}"></div>
+   <div class="field"><label for="d-inicio">Fecha de inicio</label><input type="date" id="d-inicio" data-d="inicio" value="${esc(S.datos.inicio)}"></div>
+  </div>
+ </div>`;
+}
+const cfg=$("#cfg");
+cfg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.mode){S.mode=b.dataset.mode;update();return}
+ if(b.dataset.mom){S.mom[b.dataset.mom]=!S.mom[b.dataset.mom];update();return}
+ if(b.dataset.oah){const s=new Set(curOAH());s.has(b.dataset.oah)?s.delete(b.dataset.oah):s.add(b.dataset.oah);S.oah=s;update();return}
+ if(b.dataset.oaa){const s=new Set(curOAA());s.has(b.dataset.oaa)?s.delete(b.dataset.oaa):s.add(b.dataset.oaa);S.oaa=s;update();return}
+ if(b.dataset.reset){S[b.dataset.reset]=null;update();return}
+});
+const clampInt=(v,a,b,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.min(b,Math.max(a,v))};
+cfg.addEventListener("change",e=>{const t=e.target;
+ if(t.id==="f-n")S.nClases=clampInt(t.value,1,40,4);
+ else if(t.id==="f-sem")S.semanas=clampInt(t.value,1,20,2);
+ else if(t.id==="f-mes")S.meses=clampInt(t.value,1,10,1);
+ else if(t.id==="f-semu")S.semU=clampInt(t.value,1,40,suggWeeks());
+ else if(t.id==="f-cps")S.cps=+t.value;
+ else if(t.id==="f-dur")S.dur=+t.value;
+ else if(t.id==="f-form")S.formStrat=t.value;
+ else if(t.id==="f-instr")S.instr=t.value;
+ else if(t.dataset.nee){t.checked?S.nee.add(t.dataset.nee):S.nee.delete(t.dataset.nee)}
+ else if(t.dataset.d){S.datos[t.dataset.d]=t.value;renderDoc();save();return}
+ else if(t.id==="f-note"){S.neeNote=t.value;renderDoc();save();return}
+ else return;
+ update();
+});
+cfg.addEventListener("input",e=>{const t=e.target;if(t.dataset.d){S.datos[t.dataset.d]=t.value;schedule()}else if(t.id==="f-note"){S.neeNote=t.value;schedule()}});
+let tmr;function schedule(){clearTimeout(tmr);tmr=setTimeout(()=>{renderDoc();save()},300)}
+
+/* ============ MOTOR DE PLANIFICACIÓN ============ */
+function totalClasses(){
+ if(S.mode==="clase")return S.nClases;
+ if(S.mode==="semanal")return S.semanas*S.cps;
+ if(S.mode==="mensual")return S.meses*4*S.cps;
+ return (S.semU??suggWeeks())*S.cps;
+}
+const r5=x=>Math.max(5,Math.round(x/5)*5);
+function times(){const i=r5(S.dur*.15),c=r5(S.dur*.15);return[i,S.dur-i-c,c]}
+function cycle(arr,i){return arr[i%arr.length]}
+
+function buildPlan(){
+ const oas=selArr(),k=oas.length,N=totalClasses();
+ const sumClass=S.mom.sum&&N>=3;const teach=sumClass?N-1:N;
+ const groups=[];
+ if(teach>=k){const base=Math.floor(teach/k),rem=teach%k;
+  oas.forEach((n,i)=>{const m=base+(i<rem?1:0);for(let j=0;j<m;j++)groups.push({oas:[n],j,m})})}
+ else{const per=Math.ceil(k/teach);for(let x=0;x<k;x+=per)groups.push({oas:oas.slice(x,x+per),j:0,m:1})}
+ const [ti,td,tc]=times();
+ const oahSel=[...curOAH()],oaaSel=[...curOAA()].sort();
+ const classes=groups.map((g,idx)=>{
+  const n=g.oas[0],o=OA[n],j=g.j,m=g.m,fi=j%3,foco=o.f[fi],act=o.a[j%3];
+  const sint=m>=4&&j===m-1;const deep=!sint&&j>=3;
+  const extra=g.oas.slice(1);
+  let obj,ind,ini,des;
+  if(sint){
+   obj=`Sintetizar los aprendizajes sobre ${o.k} mediante la elaboración de un organizador gráfico y su aplicación a fuentes nuevas.`;
+   ind=o.i.slice(0,3);
+   ini=`Recapitulación de las clases anteriores con la pregunta: «${o.f[0][2]}». Se comunica el objetivo de la clase.`;
+   des=`**Síntesis y aplicación:** en parejas construyen un mapa conceptual que integre ${o.c.join(", ")}. Luego resuelven una actividad con fuentes nuevas que permite verificar el logro de los indicadores trabajados. Se socializan dos o tres mapas y se retroalimenta.`;
+  }else{
+   obj=`${foco[0]} ${foco[1]}${extra.length?`, en relación con ${extra.map(x=>OA[x].k).join(" y ")}`:""}, mediante ${act[1]}.`;
+   ind=m===1?o.i.slice(0,2):[o.i[j%4]];
+   extra.forEach(x=>ind.push(OA[x].i[0]));
+   const pool=[`Se presenta el objetivo de la clase y la pregunta problematizadora: «${foco[2]}». Los estudiantes registran una hipótesis individual y la comparten en parejas.`,
+    `Rutina de pensamiento «Veo, pienso, me pregunto» a partir de una imagen o fuente vinculada a ${foco[1]}. Se comunica el objetivo de la clase.`,
+    `Lluvia de ideas para activar conocimientos previos sobre ${o.c.slice(0,3).join(", ")}. Se plantea la pregunta: «${foco[2]}».`,
+    `Recapitulación de la clase anterior con dos preguntas orales y presentación del objetivo. Pregunta guía: «${foco[2]}».`];
+   ini=idx===0?pool[0]:cycle(pool,idx);
+   des=`**${act[0]}:** ${act[2]}${deep?" En esta clase de profundización se incorporan fuentes adicionales y se exige un mayor nivel de fundamentación.":""}${extra.length?` Se integra ${extra.map(x=>OA[x].k).join(" y ")} con una fuente breve para cada objetivo.`:""}`;
+  }
+  if(idx===0&&S.mom.diag)ini=`**Diagnóstico:** cuestionario breve (5 preguntas) sobre conceptos previos (${o.c.slice(0,3).join(", ")}). `+ini;
+  const q=sint?o.f[0][2]:foco[2];
+  const cie=S.mom.form?FORM[S.formStrat].c(q,o.k):`Síntesis colectiva: el curso responde «${q}» y se registran las ideas principales en la pizarra.`;
+  const ev=[];
+  if(idx===0&&S.mom.diag)ev.push("Diagnóstica: cuestionario de conceptos previos (sin calificación).");
+  if(S.mom.form)ev.push(`Formativa: ${FORM[S.formStrat].n.toLowerCase()} que verifica el indicador «${ind[0]}»`);
+  if(!ev.length)ev.push("Observación del trabajo en clase.");
+  const ad=[...S.nee].map(key=>`**${NEE[key].n}:** ${cycle(NEE[key].s,idx).replace("{c}",o.c.slice(0,4).join(", "))}`);
+  if(S.neeNote.trim())ad.push(`**Nota:** ${S.neeNote.trim()}`);
+  const att=oaaSel.length?cycle(oaaSel,idx):null;
+  const hab=sint?"j":act[3];
+  return{num:idx+1,oas:g.oas,obj,ind,ini,des,cie,ev,ad,att,hab,habOk:oahSel.includes(hab),
+   res:sint?"Organizador gráfico, fuentes nuevas, proyector":`${RES[act[3]]}, proyector y presentación`,t:[ti,td,tc],act:sint?"Síntesis y aplicación":act[0]};
+ });
+ if(sumClass){const I=INSTR[S.instr];const allInd=oas.flatMap(n=>OA[n].i.slice(0,2)).slice(0,6);const idx=classes.length;
+  classes.push({num:idx+1,oas,sum:true,obj:`Demostrar los aprendizajes sobre ${oas.map(n=>OA[n].k).join("; ")} mediante ${I.n.toLowerCase()}.`,ind:allInd,
+   ini:"Se explicitan los criterios de evaluación y se resuelven dudas sobre el instrumento.",des:`**Evaluación sumativa:** ${I.d}`,cie:"Autoevaluación del desempeño y del proceso de estudio; registro de metas para la siguiente unidad.",
+   ev:[`Sumativa: ${I.n}.`],ad:[...S.nee].map(key=>`**${NEE[key].n}:** ${key==="dua"?"Ofrecer formatos alternativos de respuesta (oral o escrita) con los mismos criterios.":key==="ac"?"Incluir una pregunta de desafío opcional de mayor complejidad.":"Aplicar la evaluación diferenciada (tiempo adicional, lectura mediada o formato ajustado) según el decreto 67 y el reglamento de evaluación."}`).concat(S.neeNote.trim()?[`**Nota:** ${S.neeNote.trim()}`]:[]),
+   att:oaaSel.length?cycle(oaaSel,idx):null,hab:"m",res:"Instrumento de evaluación impreso o digital",t:times(),act:I.n});
+ }
+ classes.forEach((c,i)=>{c.week=Math.floor(i/S.cps)+1;c.month=Math.floor((c.week-1)/4)+1});
+ return{classes,oas,N};
+}
+
+/* ============ BLOQUES DEL DOCUMENTO ============ */
+function weekLabel(w){if(!S.datos.inicio)return`Semana ${w}`;const d=new Date(S.datos.inicio+"T12:00:00");if(isNaN(d))return`Semana ${w}`;d.setDate(d.getDate()+(w-1)*7);return`Semana ${w} (desde el ${d.toLocaleDateString("es-CL",{day:"numeric",month:"long"})})`}
+const attTxt=a=>a?`**OAA ${a}:** ${OAA[a][0]} Esta actitud ${OAA[a][1]}`:"Sin actitud seleccionada.";
+const indTxt=arr=>arr.map(x=>"• "+x).join("\n");
+function buildBlocks(){
+ const P=buildPlan(),B=[],oas=P.oas,units=[...new Set(oas.map(n=>unitOf(n).id))];
+ B.push({t:"h1",x:`Planificación ${MODES[S.mode].toLowerCase()} · Historia, Geografía y Ciencias Sociales`});
+ B.push({t:"kv",rows:[["Establecimiento",S.datos.esc||"—"],["Docente",S.datos.doc||"—"],["Curso / Año",`${S.datos.curso||"2° Medio"} · ${S.datos.anio||""}`],
+  ["Unidad",units.map(u=>`Unidad ${u}: ${UNITS[u-1].name}`).join("\n")],["Tiempo",`${P.classes.length} clases de ${S.dur} min (${S.cps} por semana; ${Math.ceil(P.classes.length/S.cps)} semanas aprox.)`],
+  ["Evaluación",[S.mom.diag&&"Diagnóstica",S.mom.form&&`Formativa (${FORM[S.formStrat].n})`,S.mom.sum&&`Sumativa (${INSTR[S.instr].n})`].filter(Boolean).join(" · ")||"—"]]});
+ B.push({t:"h2",x:"Objetivos de Aprendizaje"});
+ B.push({t:"table",w:[.12,.88],head:["OA","Descripción"],rows:oas.map(n=>[`**OA ${n}**`,OA[n].t])});
+ const oah=[...curOAH()].sort(),oaa=[...curOAA()].sort();
+ B.push({t:"h2",x:"Habilidades y actitudes"});
+ B.push({t:"kv",rows:[["Habilidades",oah.map(k=>`**${k})** ${OAH[k]}`).join("\n")||"—"],["Actitudes",oaa.map(k=>`**${k})** ${OAA[k][0]}`).join("\n")||"—"]]});
+ B.push({t:"h2",x:"Indicadores de evaluación"});
+ B.push({t:"table",w:[.12,.88],head:["OA","Indicadores"],rows:oas.map(n=>[`**OA ${n}**`,indTxt(OA[n].i)])});
+
+ const C=P.classes;
+ if(S.mode==="unidad"){
+  B.push({t:"h2",x:"Propósito de la unidad"});
+  units.forEach(u=>B.push({t:"p",x:`**Unidad ${u}.** ${UNITS[u-1].prop}`}));
+  B.push({t:"kv",rows:[["Conceptos clave",[...new Set(oas.flatMap(n=>OA[n].c))].join(", ")],["Preguntas problematizadoras",oas.map(n=>"• "+OA[n].f[0][2]).join("\n")]]});
+ }
+
+ if(S.mode==="clase"){
+  B.push({t:"h2",x:"Secuencia clase a clase"});
+  C.forEach(c=>{B.push({t:"h3",x:`Clase ${c.num} · ${c.sum?"Evaluación sumativa":"OA "+c.oas.join(", ")} · ${weekLabel(c.week)}`});B.push({t:"kv",rows:classRows(c)})});
+ }else if(S.mode==="semanal"){
+  B.push({t:"h2",x:"Planificación semanal"});
+  groupBy(C,"week").forEach(([w,cs])=>{
+   B.push({t:"h3",x:weekLabel(w)});
+   B.push({t:"kv",rows:[["Objetivo de la semana",`Al finalizar la semana, los estudiantes serán capaces de:\n${cs.map(c=>"• "+c.obj).join("\n")}`],["OA",[...new Set(cs.flatMap(c=>c.oas))].map(n=>"OA "+n).join(", ")]]});
+   B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.map(c=>[`**${c.num}**`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)])});
+   B.push({t:"kv",rows:[["Evaluación",uniq(cs.flatMap(c=>c.ev)).join("\n")],["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitud",uniq(cs.map(c=>c.att).filter(Boolean)).map(a=>attTxt(a)).join("\n")||"—"],["Recursos",uniq(cs.map(c=>c.res)).join("; ")]]});
+  });
+ }else{
+  const byMonth=S.mode==="mensual";
+  B.push({t:"h2",x:byMonth?"Planificación mensual":"Secuencia de la unidad"});
+  const groups=byMonth?groupBy(C,"month"):[[1,C]];
+  groups.forEach(([m,cs])=>{
+   if(byMonth)B.push({t:"h3",x:`Mes ${m}`});
+   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Objetivos de clase","Actividades","Indicadores y evaluación"],rows:groupBy(cs,"week").map(([w,ws])=>[`**${weekLabel(w)}**\nOA ${[...new Set(ws.flatMap(c=>c.oas))].join(", ")}`,ws.map(c=>`${c.num}. ${c.obj}`).join("\n"),ws.map(c=>`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`).join("\n"),uniq(ws.flatMap(c=>c.ind)).map(x=>"• "+x).join("\n")+"\n"+uniq(ws.flatMap(c=>c.ev)).map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")])});
+   B.push({t:"kv",rows:[["Adecuaciones",uniq(cs.flatMap(c=>c.ad)).join("\n")||"—"],["Actitudes",uniq(cs.map(c=>c.att).filter(Boolean)).map(a=>attTxt(a)).join("\n")||"—"]]});
+  });
+  if(!byMonth){B.push({t:"h3",x:"Estructura sugerida de cada clase"});B.push({t:"p",x:`Inicio (${times()[0]} min): pregunta problematizadora y objetivo · Desarrollo (${times()[1]} min): actividad central con fuentes · Cierre (${times()[2]} min): ${S.mom.form?FORM[S.formStrat].n.toLowerCase():"síntesis colectiva"}.`})}
+ }
+
+ B.push({t:"h2",x:"Evaluación"});
+ const evRows=[];
+ if(S.mom.diag)evRows.push(["Diagnóstica","Cuestionario breve de conceptos previos al inicio, sin calificación, para ajustar la secuencia."]);
+ if(S.mom.form)evRows.push(["Formativa",`${FORM[S.formStrat].n} al cierre de cada clase, con retroalimentación al inicio de la siguiente.`]);
+ if(S.mom.sum)evRows.push(["Sumativa",`${INSTR[S.instr].n}. ${INSTR[S.instr].d}${C.length<3?" (Con menos de 3 clases se sugiere aplicarla en una clase posterior.)":""}`]);
+ if(evRows.length)B.push({t:"kv",rows:evRows});
+ if(S.mom.sum)instrBlocks(B,oas);
+ B.push({t:"small",x:"Documento generado con el Planificador HGCS 2° Medio. Textos de OA adaptados de las Bases Curriculares 7° básico a 2° medio (Decreto 614/2013); verificar redacción oficial en curriculumnacional.cl."});
+ return B;
+}
+function classRows(c){return[["Objetivo de la clase",c.obj],["OA",c.oas.map(n=>`OA ${n}`).join(", ")],["Indicadores",indTxt(c.ind)],["Habilidad",`${c.hab}) ${OAH[c.hab]}`],
+ ["Actividad",`**Inicio (${c.t[0]} min):** ${c.ini}\n**Desarrollo (${c.t[1]} min):** ${c.des}\n**Cierre (${c.t[2]} min):** ${c.cie}`],["Evaluación",c.ev.join("\n")],["Adecuación",c.ad.join("\n")||"—"],["Actitud",attTxt(c.att)],["Recursos",c.res]]}
+function instrBlocks(B,oas){
+ const I=INSTR[S.instr];const ind=oas.flatMap(n=>OA[n].i.slice(0,2)).slice(0,6);const crit=ind.concat(I.x);
+ B.push({t:"h3",x:I.n});
+ if(I.kind==="rubrica"){
+  B.push({t:"table",w:[.28,.24,.24,.24],head:["Criterio","Logrado (3)","Medianamente logrado (2)","Por lograr (1)"],rows:crit.map(c=>[c,"Cumple el criterio de forma completa, precisa y fundamentada con evidencia.","Cumple el criterio de forma parcial o con imprecisiones.","No cumple el criterio o lo hace con errores importantes."])});
+  B.push({t:"p",x:`Puntaje total: ${crit.length*3} puntos. Nota 4,0 con el 60% de logro (${Math.ceil(crit.length*3*.6)} puntos).`});
+ }else if(I.kind==="escala"){
+  B.push({t:"table",w:[.6,.1,.1,.1,.1],head:["Criterio","4","3","2","1"],rows:crit.map(c=>[c,"","","",""])});
+  B.push({t:"p",x:"4 = Muy bueno · 3 = Bueno · 2 = Suficiente · 1 = Insuficiente. Puntaje total: "+crit.length*4+" puntos."});
+ }else if(I.kind==="cotejo"){
+  B.push({t:"table",w:[.7,.1,.1,.1],head:["Indicador","Sí","No","Obs."],rows:crit.map(c=>[c,"","",""])});
+ }else{
+  const tipos=["Selección múltiple","Análisis de fuente","Desarrollo breve","Verdadero o falso justificado"],cant=[4,2,1,3],pts=[1,2,4,2];
+  let tot=0;const rows=ind.map((c,i)=>{const t=i%4;const p=cant[t]*pts[t];tot+=p;return[c,tipos[t],String(cant[t]),String(p)]});
+  rows.push(["**Total**","","",`**${tot}**`]);
+  B.push({t:"table",w:[.52,.2,.12,.16],head:["Indicador","Tipo de ítem","N° de ítems","Puntaje"],rows});
+  B.push({t:"p",x:`Nota 4,0 con el 60% de logro (${Math.ceil(tot*.6)} puntos).`});
+ }
+}
+const uniq=a=>[...new Set(a)];
+const strip=s=>s.replace(/\*\*/g,"");
+function groupBy(arr,key){const m=new Map();arr.forEach(x=>{if(!m.has(x[key]))m.set(x[key],[]);m.get(x[key]).push(x)});return[...m.entries()]}
+
+/* ============ RENDER HTML ============ */
+function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")}
+function cellHTML(s){return String(s).split("\n").map(l=>`<p>${inl(l)}</p>`).join("")}
+function blocksHTML(B){return B.map(b=>{
+ if(b.t==="h1")return`<h1>${inl(b.x)}</h1>`;
+ if(b.t==="h2")return`<h2>${inl(b.x)}</h2>`;
+ if(b.t==="h3")return`<h3>${inl(b.x)}</h3>`;
+ if(b.t==="p")return`<p>${inl(b.x)}</p>`;
+ if(b.t==="small")return`<p class="small">${inl(b.x)}</p>`;
+ if(b.t==="kv")return`<table><tbody>${b.rows.map(r=>`<tr><td class="k">${inl(r[0])}</td><td>${cellHTML(r[1])}</td></tr>`).join("")}</tbody></table>`;
+ if(b.t==="table")return`<table><colgroup>${b.w.map(w=>`<col style="width:${w*100}%">`).join("")}</colgroup><thead><tr>${b.head.map(h=>`<th>${inl(h)}</th>`).join("")}</tr></thead><tbody>${b.rows.map(r=>`<tr>${r.map(c=>`<td>${cellHTML(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+ return"";}).join("")}
+
+/* ============ DOCX ============ */
+const xe=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function runs(line,o){return line.split(/(\*\*.+?\*\*)/g).filter(Boolean).map(seg=>{const b=/^\*\*.+\*\*$/.test(seg);const t=b?seg.slice(2,-2):seg;
+ return`<w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>${(b||o.b)?"<w:b/>":""}${o.color?`<w:color w:val="${o.color}"/>`:""}<w:sz w:val="${o.sz||20}"/><w:szCs w:val="${o.sz||20}"/></w:rPr><w:t xml:space="preserve">${xe(t)}</w:t></w:r>`}).join("")}
+function para(s,o={},ppr=""){return String(s).split("\n").map(l=>`<w:p><w:pPr>${ppr}<w:spacing w:before="${o.before||0}" w:after="${o.after??60}"/></w:pPr>${runs(l,o)}</w:p>`).join("")}
+const W=10440;
+function tbl(rows,widths,headRow,keyCol){
+ const ws=widths.map(f=>Math.round(W*f));const bd=["top","left","bottom","right","insideH","insideV"].map(k=>`<w:${k} w:val="single" w:sz="4" w:space="0" w:color="BFC9D6"/>`).join("");
+ let x=`<w:tbl><w:tblPr><w:tblW w:w="${W}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>${bd}</w:tblBorders><w:tblCellMar><w:top w:w="50" w:type="dxa"/><w:left w:w="90" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/><w:right w:w="90" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${ws.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>`;
+ const cell=(c,w,shade,bold)=>`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${shade?`<w:shd w:val="clear" w:color="auto" w:fill="${shade}"/>`:""}</w:tcPr>${para(c,{sz:18,after:30,b:bold})}</w:tc>`;
+ if(headRow)x+=`<w:tr><w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>${headRow.map((h,i)=>cell(h,ws[i],"DCE5F0",true)).join("")}</w:tr>`;
+ rows.forEach(r=>{x+=`<w:tr>${r.map((c,i)=>cell(c,ws[i],keyCol&&i===0?"EEF2F7":"",keyCol&&i===0)).join("")}</w:tr>`});
+ return x+`</w:tbl>`+para("",{after:60});
+}
+function blocksXML(B){return B.map(b=>{
+ if(b.t==="h1")return para(b.x,{b:1,sz:30,color:"1D3B66",after:120});
+ if(b.t==="h2")return para(b.x,{b:1,sz:25,color:"1D3B66",before:200,after:80},`<w:keepNext/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="9FB2CC"/></w:pBdr>`);
+ if(b.t==="h3")return para(b.x,{b:1,sz:22,color:"23324A",before:160,after:60},"<w:keepNext/>");
+ if(b.t==="p")return para(b.x,{sz:20});
+ if(b.t==="small")return para(b.x,{sz:16,color:"5B6875",before:120});
+ if(b.t==="kv")return tbl(b.rows,[.23,.77],null,true);
+ if(b.t==="table")return tbl(b.rows,b.w,b.head,false);
+ return"";}).join("")}
+async function makeDocx(B){
+ const zip=new JSZip();
+ zip.file("[Content_Types].xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
+ zip.file("_rels/.rels",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+ zip.file("word/document.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${blocksXML(B)}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1000" w:right="900" w:bottom="1000" w:left="900" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr></w:body></w:document>`);
+ return zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+}
+
+/* ============ DOCUMENTO / ACCIONES ============ */
+let blocks=[];
+function renderDoc(){
+ const empty=!S.sel.size;$("#dl").disabled=empty;$("#cp").disabled=empty;
+ if(empty){$("#doc").innerHTML=`<div class="empty"><strong>El documento aparecerá aquí</strong>Selecciona uno o más OA para generar la planificación.</div>`;return}
+ blocks=buildBlocks();$("#doc").innerHTML=blocksHTML(blocks);
+}
+function steps(){$("#st1").classList.toggle("on",true);["#st2","#st3","#st4"].forEach(s=>$(s).classList.toggle("on",S.sel.size>0))}
+function update(){renderOAList();renderCfg();renderDoc();steps();save()}
+function msg(t,cls){const m=$("#msg");m.textContent=t;m.className="msg"+(cls?" "+cls:"")}
+
+let dlNS;
+$("#dl").addEventListener("click",async()=>{
+ if(!S.sel.size)return;
+ if(typeof JSZip==="undefined"){msg("No se pudo cargar el generador de Word. Usa «Copiar» y pega en Word.","err");return}
+ const inClaude=!!(window.claude&&window.claude.use);
+ if(dlNS===undefined){try{dlNS=inClaude?await window.claude.use("downloads"):null}catch(e){dlNS=null}}
+ if(inClaude&&!dlNS){msg("La descarga no está disponible en esta vista. Usa «Copiar» y pega en Word o Google Docs.","err");return}
+ msg("Generando documento…");
+ try{const blob=await makeDocx(blocks);
+  const fn=`Planificacion_HGCS_2M_${MODES[S.mode].replace(/\s+/g,"_")}_OA${selArr().join("-")}.docx`;
+  if(dlNS){await dlNS.save({filename:fn,data:blob})}
+  else{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+  msg("Documento descargado.","ok");
+ }catch(e){const c=e&&e.code;msg(c==="declined"?"Descarga cancelada.":c==="rate_limited"?"Hay una descarga pendiente; inténtalo en unos segundos.":"No se pudo descargar. Usa «Copiar» y pega en Word.","err")}
+});
+$("#cp").addEventListener("click",async()=>{
+ const el=$("#doc");const html=`<div style="font-family:Calibri,Arial,sans-serif">${el.innerHTML.replace(/<table>/g,'<table border="1" cellpadding="5" style="border-collapse:collapse;width:100%">')}</div>`;
+ try{if(!window.ClipboardItem)throw 0;await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([el.innerText],{type:"text/plain"})})]);msg("Copiado. Pégalo en Word o Google Docs.","ok")}
+ catch(e){try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);const ok=document.execCommand("copy");msg(ok?"Copiado. Pégalo en Word o Google Docs.":"Texto seleccionado: presiona Ctrl+C para copiar.",ok?"ok":"")}catch(_){msg("Selecciona el documento y presiona Ctrl+C.","err")}}
+});
+$("#q").value="";
+update();
+</script>
+</body></html>
