@@ -26,9 +26,16 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 
 ## Lógica
 - Estado `S` en localStorage `plan-oa-v2` (selección por nivel en `S.selBy`).
+- Duración de clases: `S.cps` clases por semana y `S.durs` [4 duraciones, una por posición en la semana; opciones `DUR_OPTS` 45/60/80/90/120]. `durOf(idx)` da la duración de la clase según `idx % S.cps`; `times(d)` reparte inicio/desarrollo/cierre (15 %/70 %/15 %); `durSummary()` y `weekMinutes()` para los textos. Cada clase guarda `c.dur`.
 - `buildPlan()` reparte clases entre OA (síntesis si ≥4 clases por OA; clase sumativa final si N≥3). Formativa: `FORM` (10 estrategias); `formStrat:"random"` usa `formSeq()` con semilla `S.seed` (botón "Volver a sortear").
 - Sumativa: `INSTR` (rúbricas, prueba, `paes`, escala, cotejo, portafolio). `S.pts` puntaje total y `S.bloom` [% básicas, intermedias, superiores]; `bloomPts()` reparte; `instrBlocks()` arma tabla Bloom + tabla de especificaciones (prueba/PAES) o criterios con puntaje.
 - `buildBlocks()` → `blocksHTML()` vista previa y `blocksXML()`/`makeDocx()` Word con JSZip 3.10.1 (cdnjs). Descarga: `claude.use("downloads")` dentro de Claude, Blob fuera.
+
+## Documento generado
+- Semanal, mensual y por unidad: tablas con una fila por clase y, debajo, una fila de ancho completo con sus adecuaciones (`adRow(c)` devuelve `{full:…}`; `blocksHTML` usa `colspan` y `tbl()` usa `gridSpan` en el Word).
+
+## Respaldo
+- Tag y release de GitHub `respaldo-2026-11-18` (commit 5a5036a): 8 asignaturas, 20 niveles, adecuaciones por clase.
 
 ## Pendientes / notas
 - Textos de OA adaptados (no literales); verificar con curriculumnacional.cl si se requiere redacción oficial.

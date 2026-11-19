@@ -1361,13 +1361,14 @@ function useSubject(key){D=SUBJ[key]||null;if(!D)return;OA=D.OA;UNITS=D.units;OA
 const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
 
 /* ============ ESTADO ============ */
-const S={subj:null,key:null,selBy:{},sel:new Set(),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,
+const S={subj:null,key:null,selBy:{},sel:new Set(),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,durs:[90,90,90,90],
  mom:{diag:true,form:true,sum:true},instr:"rub_ensayo",formStrat:"ticket",seed:12345,pts:60,bloom:[30,45,25],
  oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",datos:{esc:"",doc:"",curso:"",anio:"2027",inicio:""},q:""};
 try{const raw=localStorage.getItem("plan-oa-v2");if(raw){const o=JSON.parse(raw);
  Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:"",selBy:o.selBy||{},bloom:Array.isArray(o.bloom)&&o.bloom.length===3?o.bloom:[30,45,25],mom:Object.assign({diag:true,form:true,sum:true},o.mom||{})});}}catch(e){}
 if(S.key&&!SUBJ[S.key]){S.key=null}
 if(!INSTR[S.instr])S.instr="rub_ensayo";
+if(!Array.isArray(S.durs)||S.durs.length!==4||S.durs.some(x=>!(x>0)))S.durs=Array(4).fill(S.dur||90);
 if(S.formStrat!=="random"&&!FORM[S.formStrat])S.formStrat="ticket";
 if(S.key)useSubject(S.key);
 function save(){try{if(S.key)S.selBy[S.key]=[...S.sel];localStorage.setItem("plan-oa-v2",JSON.stringify({...S,sel:[...S.sel],nee:[...S.nee],oah:S.oah?[...S.oah]:null,oaa:S.oaa?[...S.oaa]:null}))}catch(e){}}
@@ -1426,7 +1427,9 @@ function renderCfg(){
  if(!S.sel.size){box.innerHTML=`<div class="empty"><strong>Selecciona al menos un OA</strong>Al marcar un objetivo se despliegan las opciones de tiempo, evaluación, habilidades, actitudes y adecuaciones.</div>`;return}
  const tags=selArr().map(n=>`<span class="tag" style="--uc:${ucolor(unitOf(n).id)}"><b>${oaName(n)}</b> · ${D.unitWord!=="Unidad"?esc(unitOf(n).name):"U"+unitOf(n).id}</span>`).join("");
  const cps=`<div class="field"><label for="f-cps">Clases por semana</label><select id="f-cps">${[1,2,3,4].map(v=>`<option ${S.cps==v?"selected":""}>${v}</option>`).join("")}</select></div>`;
- const dur=`<div class="field"><label for="f-dur">Minutos por clase</label><select id="f-dur">${[45,60,80,90].map(v=>`<option value="${v}" ${S.dur==v?"selected":""}>${v} min</option>`).join("")}</select></div>`;
+ const durSel=(i,label)=>`<div class="field"><label for="f-dur${i}">${label}</label><select id="f-dur${i}" data-durpos="${i}">${DUR_OPTS.map(v=>`<option value="${v}" ${S.durs[i]==v?"selected":""}>${v} min</option>`).join("")}</select></div>`;
+ const dur=S.cps===1?durSel(0,"Minutos por clase"):"";
+ const durRow=S.cps>1?`<div class="lab">Duración de cada clase de la semana</div><div class="fields">${Array.from({length:S.cps},(_,i)=>durSel(i,`Clase ${i+1} de la semana`)).join("")}</div>`:"";
  let tf="";
  if(S.mode==="clase")tf=`<div class="field"><label for="f-n">N° de clases</label><input type="number" id="f-n" min="1" max="40" value="${S.nClases}"></div>${cps}${dur}`;
  if(S.mode==="semanal")tf=`<div class="field"><label for="f-sem">N° de semanas</label><input type="number" id="f-sem" min="1" max="20" value="${S.semanas}"></div>${cps}${dur}`;
@@ -1439,7 +1442,8 @@ function renderCfg(){
  <div class="sec"><h3>Temporalidad</h3>
   <div class="seg" role="group" aria-label="Tipo de planificación">${Object.entries(MODES).map(([k,v])=>`<button type="button" data-mode="${k}" aria-pressed="${S.mode===k}">${v}</button>`).join("")}</div>
   <div class="fields">${tf}</div>
-  <div class="hint">Total: <b>${totalClasses()} clases</b> de ${S.dur} min para ${S.sel.size} OA.${hintU}</div>
+  ${durRow}
+  <div class="hint">Total: <b>${totalClasses()} clases</b> para ${S.sel.size} OA · Cada semana: ${durSummary()} (<b>${weekMinutes()} min</b>).${hintU}</div>
  </div>
  <div class="sec"><h3>Evaluación</h3>
   <div class="chips" role="group" aria-label="Tipos de evaluación">
@@ -1496,7 +1500,7 @@ cfg.addEventListener("change",e=>{const t=e.target;
  else if(t.id==="f-mes")S.meses=clampInt(t.value,1,10,1);
  else if(t.id==="f-semu")S.semU=clampInt(t.value,1,40,suggWeeks());
  else if(t.id==="f-cps")S.cps=+t.value;
- else if(t.id==="f-dur")S.dur=+t.value;
+ else if(t.dataset.durpos){S.durs[+t.dataset.durpos]=+t.value}
  else if(t.id==="f-form")S.formStrat=t.value;
  else if(t.id==="f-instr")S.instr=t.value;
  else if(t.id==="f-pts"){S.pts=clampInt(t.value,5,200,60);t.value=S.pts;refreshBloom();return}
@@ -1524,7 +1528,13 @@ function totalClasses(){
  return (S.semU??suggWeeks())*S.cps;
 }
 const r5=x=>Math.max(5,Math.round(x/5)*5);
-function times(){const i=r5(S.dur*.15),c=r5(S.dur*.15);return[i,S.dur-i-c,c]}
+const DUR_OPTS=[45,60,80,90,120];
+function times(d){const i=r5(d*.15),c=r5(d*.15);return[i,d-i-c,c]}
+/* Duración de la clase según su posición en la semana (clase 1, 2, 3 o 4) */
+const durOf=idx=>S.durs[idx%S.cps];
+const weekDurs=()=>S.durs.slice(0,S.cps);
+const weekMinutes=()=>weekDurs().reduce((a,b)=>a+b,0);
+function durSummary(){const m=new Map();weekDurs().forEach(d=>m.set(d,(m.get(d)||0)+1));return[...m.entries()].map(([d,n])=>`${n} ${n===1?"clase":"clases"} de ${d} min`).join(" y ")}
 const cycle=(arr,i)=>arr[i%arr.length];
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function formSeq(n){
@@ -1542,7 +1552,6 @@ function buildPlan(){
  if(teach>=k){const base=Math.floor(teach/k),rem=teach%k;
   oas.forEach((n,i)=>{const m=base+(i<rem?1:0);for(let j=0;j<m;j++)groups.push({oas:[n],j,m})})}
  else{const per=Math.ceil(k/teach);for(let x=0;x<k;x+=per)groups.push({oas:oas.slice(x,x+per),j:0,m:1})}
- const [ti,td,tc]=times();
  const oaaSel=[...curOAA()].sort();
  const seq=formSeq(groups.length);
  const classes=groups.map((g,idx)=>{
@@ -1579,14 +1588,14 @@ function buildPlan(){
   if(S.neeNote.trim())ad.push(`**Nota:** ${S.neeNote.trim()}`);
   const hab=sint?Object.keys(OAH).find(x=>/crítico|Analizar resultados|Investigación|síntesis/i.test(OAHshort[x]))||act[3]:act[3];
   return{num:idx+1,oas:g.oas,obj,ind,ini,des,cie,ev,ad,fk,att:oaaSel.length?cycle(oaaSel,idx):null,hab,
-   res:sint?"Organizador gráfico, recursos nuevos, proyector":`${RES[act[3]]||"Guía de trabajo"}, proyector y presentación`,t:[ti,td,tc],act:sint?"Síntesis y aplicación":act[0]};
+   res:sint?"Organizador gráfico, recursos nuevos, proyector":`${RES[act[3]]||"Guía de trabajo"}, proyector y presentación`,dur:durOf(idx),t:times(durOf(idx)),act:sint?"Síntesis y aplicación":act[0]};
  });
  if(sumClass){const I=INSTR[S.instr];const idx=classes.length;const bp=bloomPts();
   const allInd=oas.flatMap(n=>[OA[n].i[0],OA[n].i[2],OA[n].i[3]]).slice(0,6);
   classes.push({num:idx+1,oas,sum:true,obj:`Demostrar los aprendizajes sobre ${oas.map(n=>OA[n].k).join("; ")} mediante ${I.n.charAt(0).toLowerCase()+I.n.slice(1)}.`,ind:allInd,
    ini:"Se explicitan los criterios de evaluación y se resuelven dudas sobre el instrumento.",des:`**Evaluación sumativa:** ${I.d} Puntaje total: ${S.pts} puntos (básicas ${bp[0]}, intermedias ${bp[1]}, superiores ${bp[2]}).`,cie:"Autoevaluación del desempeño y del proceso de estudio; registro de metas para la siguiente etapa.",
    ev:[`Sumativa: ${I.n} (${S.pts} puntos).`],ad:[...S.nee].map(key=>`**${NEE[key].n}:** ${key==="dua"?"Ofrecer formatos alternativos de respuesta (oral o escrita) con los mismos criterios.":key==="ac"?"Incluir una pregunta de desafío opcional de mayor complejidad.":"Aplicar evaluación diferenciada (tiempo adicional, lectura mediada o formato ajustado) según el Decreto 67 y el reglamento de evaluación."}`).concat(S.neeNote.trim()?[`**Nota:** ${S.neeNote.trim()}`]:[]),
-   att:oaaSel.length?cycle(oaaSel,idx):null,hab:Object.keys(OAH).slice(-1)[0],res:"Instrumento de evaluación impreso o digital",t:times(),act:I.n});
+   att:oaaSel.length?cycle(oaaSel,idx):null,hab:Object.keys(OAH).slice(-1)[0],res:"Instrumento de evaluación impreso o digital",dur:durOf(idx),t:times(durOf(idx)),act:I.n});
  }
  classes.forEach((c,i)=>{c.week=Math.floor(i/S.cps)+1;c.month=Math.floor((c.week-1)/4)+1});
  return{classes,oas,N};
@@ -1603,7 +1612,7 @@ function buildBlocks(){
  const P=buildPlan(),B=[],oas=P.oas,units=uniq(oas.map(n=>unitOf(n).id)),C=P.classes;
  B.push({t:"h1",x:`Planificación ${MODES[S.mode].toLowerCase()} · ${D.area} · ${D.level}`});
  B.push({t:"kv",rows:[["Establecimiento",S.datos.esc||"—"],["Docente",S.datos.doc||"—"],["Asignatura / Nivel",`${D.area} · ${D.level}`],["Curso / Año",`${S.datos.curso||D.level} · ${S.datos.anio||""}`],
-  [D.unitWord,units.map(u=>`${D.unitWord} ${u}: ${UNITS.find(x=>x.id===u).name}`).join("\n")],["Tiempo",`${C.length} clases de ${S.dur} min (${S.cps} por semana; ${Math.ceil(C.length/S.cps)} semanas aprox.)`],
+  [D.unitWord,units.map(u=>`${D.unitWord} ${u}: ${UNITS.find(x=>x.id===u).name}`).join("\n")],["Tiempo",`${C.length} clases (${S.cps} por semana: ${durSummary()}; ${weekMinutes()} min semanales; ${Math.ceil(C.length/S.cps)} semanas aprox.)`],
   ["Evaluación",[S.mom.diag&&"Diagnóstica",S.mom.form&&`Formativa (${formLabel()})`,S.mom.sum&&`Sumativa (${INSTR[S.instr].n}, ${S.pts} puntos)`].filter(Boolean).join(" · ")||"—"]]});
  B.push({t:"h2",x:"Objetivos de Aprendizaje"});
  B.push({t:"table",w:[.12,.88],head:["OA","Descripción"],rows:oas.map(n=>[`**${oaName(n)}**`,OA[n].t])});
@@ -1619,13 +1628,13 @@ function buildBlocks(){
  }
  if(S.mode==="clase"){
   B.push({t:"h2",x:"Secuencia clase a clase"});
-  C.forEach(c=>{B.push({t:"h3",x:`Clase ${c.num} · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")} · ${weekLabel(c.week)}`});B.push({t:"kv",rows:classRows(c)})});
+  C.forEach(c=>{B.push({t:"h3",x:`Clase ${c.num} (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")} · ${weekLabel(c.week)}`});B.push({t:"kv",rows:classRows(c)})});
  }else if(S.mode==="semanal"){
   B.push({t:"h2",x:"Planificación semanal"});
   groupBy(C,"week").forEach(([w,cs])=>{
    B.push({t:"h3",x:weekLabel(w)});
    B.push({t:"kv",rows:[["Objetivo de la semana",`Al finalizar la semana, los estudiantes serán capaces de:\n${cs.map(c=>"• "+c.obj).join("\n")}`],["OA",uniq(cs.flatMap(c=>c.oas)).map(oaName).join(", ")]]});
-   B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.flatMap(c=>[[`**${c.num}**`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)],...adRow(c)])});
+   B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.flatMap(c=>[[`**${c.num}**\n${c.dur} min`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)],...adRow(c)])});
    B.push({t:"kv",rows:[["Evaluación",uniq(cs.flatMap(c=>c.ev)).join("\n")],["Actitud",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"],["Recursos",uniq(cs.map(c=>c.res)).join("; ")]]});
   });
  }else{
@@ -1633,10 +1642,10 @@ function buildBlocks(){
   B.push({t:"h2",x:byMonth?"Planificación mensual":(D.unitWord==="Unidad"?"Secuencia de la unidad":"Secuencia didáctica")});
   (byMonth?groupBy(C,"month"):[[1,C]]).forEach(([m,cs])=>{
    if(byMonth)B.push({t:"h3",x:`Mes ${m}`});
-   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Clase y objetivo","Actividad","Indicadores y evaluación"],rows:cs.flatMap((c,i)=>[[i===0||cs[i-1].week!==c.week?`**${weekLabel(c.week)}**`:"",`**Clase ${c.num}** · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}\n${c.obj}`,`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`,c.ind.map(x=>"• "+x).join("\n")+"\n"+c.ev.map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")],...adRow(c)])});
+   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Clase y objetivo","Actividad","Indicadores y evaluación"],rows:cs.flatMap((c,i)=>[[i===0||cs[i-1].week!==c.week?`**${weekLabel(c.week)}**`:"",`**Clase ${c.num}** (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}\n${c.obj}`,`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`,c.ind.map(x=>"• "+x).join("\n")+"\n"+c.ev.map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")],...adRow(c)])});
    B.push({t:"kv",rows:[["Actitudes",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"]]});
   });
-  if(!byMonth){const t=times();B.push({t:"h3",x:"Estructura sugerida de cada clase"});B.push({t:"p",x:`Inicio (${t[0]} min): pregunta problematizadora y objetivo · Desarrollo (${t[1]} min): actividad central · Cierre (${t[2]} min): evaluación formativa ${S.mom.form?formLabel():"y síntesis colectiva"}.`})}
+  if(!byMonth){B.push({t:"h3",x:"Estructura sugerida de cada clase"});uniq(weekDurs()).forEach(d=>{const t=times(d);B.push({t:"p",x:`**Clases de ${d} min:** inicio (${t[0]} min): pregunta problematizadora y objetivo · desarrollo (${t[1]} min): actividad central · cierre (${t[2]} min): evaluación formativa ${S.mom.form?formLabel():"y síntesis colectiva"}.`})})}
  }
  B.push({t:"h2",x:"Evaluación"});
  const evRows=[];
