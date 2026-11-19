@@ -8,19 +8,22 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 - `README.md`.
 
 ## Publicación
-- Artifact Claude (privado): https://claude.ai/artifact/KaW3QGVViZeF97yrzHEYPp. Actualizar con Artifact publish y `url` de ese enlace (capability `downloads: true` ya declarada).
+- Artifact Claude (privado): https://claude.ai/artifact/KaW3QGVViZeF97yrzHEYPp. Actualizar con Artifact publish y `url` de ese enlace (capability `downloads: true` ya declarada). Versión 11 (19-11-2026) incluye 5° a 8° básico. Ojo: desde una sesión nueva, la herramienta exige leer completa la versión publicada antes de reemplazarla (con ~400 KB fueron 8 lecturas por tramos de ~52 KB); con la fuente actual de ~770 KB serán el doble. Conviene publicar desde la misma sesión que hace los cambios.
 - GitHub (público): repo `hjaraespinoza/app-planificacion`, rama `main`, Pages en https://hjaraespinoza.github.io/app-planificacion/ (se actualiza solo al hacer push). Commit/push solo cuando el usuario lo pida.
 - Herramientas: Git en `C:\Program Files\Git\cmd\git.exe`, GitHub CLI en `C:\Program Files\GitHub CLI\gh.exe` (sesión iniciada como hjaraespinoza). Autor git configurado solo en este repo con correo noreply.
 
-## Asignaturas (objeto `SUBJ` en el `<script>`, 20 niveles en 8 asignaturas)
-- Historia: `hist1m` (OA 1–25, 6 unidades sugeridas), `hist2m` (OA 1–25, 4 unidades del Programa).
+## Asignaturas (objeto `SUBJ` en el `<script>`, 36 niveles en 9 asignaturas)
+- Historia: `hist5b` (OA 1–22), `hist6b` (OA 1–26), `hist7b` (OA 1–23), `hist8b` (OA 1–22), `hist1m` (OA 1–25, 6 unidades sugeridas), `hist2m` (OA 1–25, 4 unidades del Programa). 5° y 6° usan `HB56_BASE` (actitudes `HB_OAA` A–I; habilidades propias de cada nivel: 5° a–m, 6° a–n). 7° y 8° reutilizan `HIST.oah/oaa/res`.
 - Educación Ciudadana: `eciu3m`, `eciu4m` (OA 1–8 cada uno, base `ECIU_BASE`).
 - Lengua y Literatura: `len8b` (OA 1–26 por eje), `len2m` (OA 1–24 por eje), `len3m` (OA 1–9), `len4m` (OA 1–8).
-- Matemática: `mat1m` (OA 1–15), `mat2m` (OA 1–12), `mat3m` y `mat4m` (OA 1–4).
+- Matemática: `mat5b` (OA 1–27), `mat6b` (OA 1–24) con `MAT56_BASE` (habilidades a–n, actitudes A–F); `mat7b` (OA 1–19), `mat8b` (OA 1–17) con `MAT78_BASE` (habilidades a–m, actitudes `MAT_OAA`); `mat1m` (OA 1–15), `mat2m` (OA 1–12), `mat3m` y `mat4m` (OA 1–4).
+- Ciencias Naturales (tarjeta `cn`): `cn5b` (OA 1–14, habilidades a–h), `cn6b` (OA 1–18, habilidades a–g) con `CN56_BASE` (actitudes A–F); `cn7b` y `cn8b` (OA 1–15, ejes Biología/Física/Química) reutilizan `CN_OAH/CN_OAA/CN_RES`.
 - Biología: `bio1m` (OA 1–8 de CN 1°M), `bio2m` (OA 1–8 de CN 2°M). Química: `quim1m` (OA 17–20), `quim2m` (OA 15–18).
 - Ciencias para la Ciudadanía: `cpc3m` y `cpc4m` comparten `CPC_BASE` (12 OA en 4 módulos, claves 1–12 con `lab` "BS 1", "SPA 2", etc.; `unitWord:"Módulo"`).
-- Educación Física y Salud: `ef1m`, `ef2m` (OA 1–5 por eje; `pre`/`post` agregan calentamiento y vuelta a la calma a cada clase).
+- Educación Física y Salud: `ef5b`, `ef6b` (OA 1–11 en 3 ejes, base `EF56_BASE`, actitudes A–H); `ef7b`, `ef8b`, `ef1m`, `ef2m` (OA 1–5 por eje, `EF_BASE`). Todas usan `pre`/`post` (calentamiento y vuelta a la calma en cada clase).
+- Pie del documento (`dec`): 5°–6° `DEC_B16` (Decreto 439/2012) y EF 5°–6° `DEC_EF16` (Decreto 433/2012); `EF_BASE` usa Decreto 369/2015; 7° básico a 2° medio sin `dec` usan el texto por defecto (Decreto 614/2013).
 - 3° y 4° medio usan `ACT34` como actitudes (habilidades siglo XXI; letras A–H son internas, no oficiales) y `dec:DEC34` para el pie del documento.
+- Numeración de OA de 5° a 8° básico verificada con curriculumnacional.cl el 19-11-2026 (textos adaptados, no literales).
 - `CATALOG` define las tarjetas de asignatura y sus niveles. Para agregar un nivel: crear objeto con `area, level, file, unitWord ("Unidad"|"Eje"|"Módulo"), hab, eje(n), units, OA, oah, oahs, oaa, oaas, res` (opcionales: `oaaLabel`, `dec`, `pre`, `post`, `lab` por OA) y registrarlo en `SUBJ` y `CATALOG`. Usar `oaName(n)` para mostrar el código del OA.
 - Formato de cada OA: `t` texto, `k` tema corto, `c` conceptos, `f` 3 focos [verbo, tema, pregunta], `i` 4 indicadores (índice 0 = Bloom básico, 1–2 = intermedio, 3 = superior; ver `IND_LEVEL`), `a` 3 actividades [nombre, "mediante…", descripción, letra de habilidad], `aa` actitudes sugeridas.
 
