@@ -94,6 +94,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .seg button:last-child{border-right:0}
 @media (max-width:520px){.seg button:nth-child(2){border-right:0}.seg button:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.seg.orient{grid-template-columns:repeat(2,minmax(0,1fr))}
+.seg.orient button{display:flex;align-items:center;justify-content:center;gap:8px;border-bottom:0}
+.seg.orient button:first-child{border-right:1px solid var(--line)}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .field{display:grid;gap:4px;min-width:0;align-content:start}
 .field label,.lab{font-size:12px;color:var(--muted);font-weight:500}
@@ -127,6 +130,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .msg.ok{color:var(--ok)}.msg.err{color:var(--warn)}
 .paperwrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line);background:var(--soft);padding:20px 12px}
 .doc{background:var(--paper);color:var(--paper-ink);max-width:900px;margin:0 auto;padding:36px 40px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-family:Calibri,Carlito,var(--f-body);font-size:13.5px;line-height:1.45}
+.doc.land{max-width:1200px}
 @media (max-width:600px){.doc{padding:22px 16px}}
 .doc h1{font-family:Calibri,Carlito,var(--f-body);font-size:22px;color:var(--accent);margin:0 0 6px}
 .doc h2{font-size:17px;color:var(--accent);margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--paper-line)}
@@ -1365,7 +1369,7 @@ const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
 /* ============ ESTADO ============ */
 const S={subj:null,key:null,selBy:{},sel:new Set(),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,durs:[90,90,90,90],
  mom:{diag:false,form:false,sum:false},momV:2,instr:"rub_ensayo",formStrat:"ticket",seed:12345,pts:60,bloom:[30,45,25],
- oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",datos:{esc:"",doc:"",curso:"",anio:"2027",inicio:""},q:""};
+ oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",datos:{esc:"",doc:"",curso:"",anio:"2027",inicio:""},orient:"v",tblOr:"v",claseFmt:"ficha",q:""};
 try{const raw=localStorage.getItem("plan-oa-v2");if(raw){const o=JSON.parse(raw);
  Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:"",selBy:o.selBy||{},bloom:Array.isArray(o.bloom)&&o.bloom.length===3?o.bloom:[30,45,25],mom:Object.assign({diag:false,form:false,sum:false},o.momV===2&&o.mom||{}),momV:2});}}catch(e){}
 if(S.key&&!SUBJ[S.key]){S.key=null}
@@ -1445,6 +1449,12 @@ function renderCfg(){
   <div class="seg" role="group" aria-label="Tipo de planificación">${Object.entries(MODES).map(([k,v])=>`<button type="button" data-mode="${k}" aria-pressed="${S.mode===k}">${v}</button>`).join("")}</div>
   <div class="fields">${tf}</div>
   ${durRow}
+  ${S.mode==="clase"?`<div class="lab">Formato de cada clase</div>
+  <div class="seg orient" role="group" aria-label="Formato de cada clase">
+   <button type="button" data-clasefmt="ficha" aria-pressed="${S.claseFmt!=="tabla"}">Ficha de clase</button>
+   <button type="button" data-clasefmt="tabla" aria-pressed="${S.claseFmt==="tabla"}">Tabla con todos los elementos</button>
+  </div>
+  <div class="hint">${S.claseFmt==="tabla"?"Todas las clases en una sola tabla con objetivo, OA, indicadores, habilidad, inicio, desarrollo, cierre, evaluación, adecuaciones, actitud y recursos.":"Una ficha por clase con todos sus elementos."} La disposición se elige en «Orientación de la tabla de planificación».</div>`:""}
   <div class="hint">Total: <b>${totalClasses()} clases</b> para ${S.sel.size} OA · Cada semana: ${durSummary()} (<b>${weekMinutes()} min</b>).${hintU}</div>
  </div>
  <div class="sec"><div class="sec-h"><h3>Evaluación</h3>${(()=>{const all=S.mom.diag&&S.mom.form&&S.mom.sum;return `<button type="button" class="btn-mini" data-act="momall" aria-pressed="${all}">${all?"Quitar todas":"Seleccionar todas"}</button>`})()}</div>
@@ -1484,10 +1494,27 @@ function renderCfg(){
    <div class="field"><label for="d-anio">Año</label><input type="text" id="d-anio" data-d="anio" value="${esc(S.datos.anio)}"></div>
    <div class="field"><label for="d-inicio">Fecha de inicio</label><input type="date" id="d-inicio" data-d="inicio" value="${esc(S.datos.inicio)}"></div>
   </div>
+ </div>
+ <div class="sec"><h3>Orientación de la página</h3>
+  <div class="seg orient" role="group" aria-label="Orientación de la página del Word">
+   <button type="button" data-orient="v" aria-pressed="${S.orient!=="h"}"><svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true"><rect x="1" y="1" width="12" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Vertical</button>
+   <button type="button" data-orient="h" aria-pressed="${S.orient==="h"}"><svg width="18" height="14" viewBox="0 0 18 14" aria-hidden="true"><rect x="1" y="1" width="16" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Horizontal</button>
+  </div>
+  <div class="hint">${S.orient==="h"?"Hoja carta horizontal: las tablas son más anchas, útil para la planificación semanal, mensual o por unidad.":"Hoja carta vertical (la orientación habitual)."} Se aplica al Word descargado y a la vista previa.</div>
+ </div>
+ <div class="sec"><h3>Orientación de la tabla de planificación</h3>
+  <div class="seg orient" role="group" aria-label="Orientación de la tabla de planificación">
+   <button type="button" data-tblor="v" aria-pressed="${S.tblOr!=="h"}"><svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="16" height="14" rx="1.5"/><path d="M6.5 1v14M1 5.7h16M1 10.3h16"/></g></svg>Vertical (predeterminada)</button>
+   <button type="button" data-tblor="h" aria-pressed="${S.tblOr==="h"}"><svg width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="16" height="14" rx="1.5"/><path d="M1 5h16M6 1v14M10 1v14M14 1v14"/></g></svg>Horizontal</button>
+  </div>
+  <div class="hint">${S.mode==="clase"?(S.claseFmt==="tabla"?(S.tblOr==="h"?"Horizontal: una fila por clase y una columna por elemento; las adecuaciones van en una fila debajo de cada clase.":"Vertical: una fila por elemento y una columna por clase (hasta 3 clases por tabla, o 4 con página horizontal)."):(S.tblOr==="h"?"Horizontal: cada ficha tiene los elementos en columnas, con las adecuaciones en una fila debajo.":"Vertical: cada ficha tiene una fila por elemento (formato habitual)."))+(S.tblOr==="h"&&S.orient!=="h"?" <b>Recomendado:</b> usar la página horizontal para que las columnas tengan más espacio.":""):S.tblOr==="h"?`Una fila por clase con columnas: clase, OA y objetivo, indicadores, inicio, desarrollo, cierre, y evaluación y recursos. Las adecuaciones van en una fila debajo de cada clase.${S.orient!=="h"?" <b>Recomendado:</b> usar la página horizontal para que las columnas tengan más espacio.":""}`:"Formato habitual: cada modalidad usa su propio diseño (ficha por clase en «clase a clase»; tablas por semana, mes o unidad)."}</div>
  </div>`;
 }
 const cfg=$("#cfg");
 cfg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.orient){S.orient=b.dataset.orient;update();return}
+ if(b.dataset.tblor){S.tblOr=b.dataset.tblor;update();return}
+ if(b.dataset.clasefmt){S.claseFmt=b.dataset.clasefmt;update();return}
  if(b.dataset.mode){S.mode=b.dataset.mode;update();return}
  if(b.dataset.mom){S.mom[b.dataset.mom]=!S.mom[b.dataset.mom];update();return}
  if(b.dataset.oah){const s=new Set(curOAH());s.has(b.dataset.oah)?s.delete(b.dataset.oah):s.add(b.dataset.oah);S.oah=s;update();return}
@@ -1631,13 +1658,17 @@ function buildBlocks(){
  }
  if(S.mode==="clase"){
   B.push({t:"h2",x:"Secuencia clase a clase"});
-  C.forEach(c=>{B.push({t:"h3",x:`Clase ${c.num} (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")} · ${weekLabel(c.week)}`});B.push({t:"kv",rows:classRows(c)})});
+  if(S.claseFmt==="tabla"){
+   if(S.tblOr==="h")B.push(fullTable(C));
+   else{const k=S.orient==="h"?4:3;for(let i=0;i<C.length;i+=k)B.push(transTable(C.slice(i,i+k)))}
+  }else C.forEach(c=>{B.push({t:"h3",x:classHead(c)});B.push(S.tblOr==="h"?fichaH(c):{t:"kv",rows:classRows(c)})});
  }else if(S.mode==="semanal"){
   B.push({t:"h2",x:"Planificación semanal"});
   groupBy(C,"week").forEach(([w,cs])=>{
    B.push({t:"h3",x:weekLabel(w)});
    B.push({t:"kv",rows:[["Objetivo de la semana",`Al finalizar la semana, los estudiantes serán capaces de:\n${cs.map(c=>"• "+c.obj).join("\n")}`],["OA",uniq(cs.flatMap(c=>c.oas)).map(oaName).join(", ")]]});
-   B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.flatMap(c=>[[`**${c.num}**\n${c.dur} min`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)],...adRow(c)])});
+   if(S.tblOr==="h")B.push(hTable(cs,false));
+   else B.push({t:"table",w:[.1,.3,.35,.25],head:["Clase","Objetivo de clase","Actividad (inicio · desarrollo · cierre)","Indicadores"],rows:cs.flatMap(c=>[[`**${c.num}**\n${c.dur} min`,c.obj,`**Inicio (${c.t[0]}'):** ${strip(c.ini)}\n**Desarrollo (${c.t[1]}'):** ${c.des}\n**Cierre (${c.t[2]}'):** ${c.cie}`,indTxt(c.ind)],...adRow(c)])});
    B.push({t:"kv",rows:[["Evaluación",uniq(cs.flatMap(c=>c.ev)).join("\n")],["Actitud",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"],["Recursos",uniq(cs.map(c=>c.res)).join("; ")]]});
   });
  }else{
@@ -1645,7 +1676,8 @@ function buildBlocks(){
   B.push({t:"h2",x:byMonth?"Planificación mensual":(D.unitWord==="Unidad"?"Secuencia de la unidad":"Secuencia didáctica")});
   (byMonth?groupBy(C,"month"):[[1,C]]).forEach(([m,cs])=>{
    if(byMonth)B.push({t:"h3",x:`Mes ${m}`});
-   B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Clase y objetivo","Actividad","Indicadores y evaluación"],rows:cs.flatMap((c,i)=>[[i===0||cs[i-1].week!==c.week?`**${weekLabel(c.week)}**`:"",`**Clase ${c.num}** (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}\n${c.obj}`,`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`,c.ind.map(x=>"• "+x).join("\n")+"\n"+c.ev.map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")],...adRow(c)])});
+   if(S.tblOr==="h")B.push(hTable(cs,true));
+   else B.push({t:"table",w:[.14,.28,.3,.28],head:["Semana","Clase y objetivo","Actividad","Indicadores y evaluación"],rows:cs.flatMap((c,i)=>[[i===0||cs[i-1].week!==c.week?`**${weekLabel(c.week)}**`:"",`**Clase ${c.num}** (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}\n${c.obj}`,`**${c.act}:** ${strip(c.des).replace(/^[^:]+:\s*/,"")}`,c.ind.map(x=>"• "+x).join("\n")+"\n"+c.ev.map(x=>"**"+x.split(":")[0]+":**"+x.slice(x.indexOf(":")+1)).join("\n")],...adRow(c)])});
    B.push({t:"kv",rows:[["Actitudes",uniq(cs.map(c=>c.att).filter(Boolean)).map(attTxt).join("\n")||"—"]]});
   });
   if(!byMonth){B.push({t:"h3",x:"Estructura sugerida de cada clase"});uniq(weekDurs()).forEach(d=>{const t=times(d);B.push({t:"p",x:`**Clases de ${d} min:** inicio (${t[0]} min): pregunta problematizadora y objetivo · desarrollo (${t[1]} min): actividad central · cierre (${t[2]} min): evaluación formativa ${S.mom.form?formLabel():"y síntesis colectiva"}.`})})}
@@ -1661,6 +1693,27 @@ function buildBlocks(){
 }
 /* Fila de ancho completo con las adecuaciones de una clase (va debajo de la fila de la clase) */
 const adRow=c=>c.ad&&c.ad.length?[{full:`**Adecuaciones · Clase ${c.num}:**\n${c.ad.join("\n")}`}]:[];
+/* Tabla de planificación horizontal (S.tblOr==="h"): una fila por clase con los momentos en columnas */
+function hTable(cs,showWeek){return{t:"table",w:[.08,.16,.15,.14,.2,.13,.14],
+ head:["Clase","OA y objetivo","Indicadores","Inicio","Desarrollo","Cierre","Evaluación y recursos"],
+ rows:cs.flatMap(c=>[[`**${c.num}**\n${c.dur} min${showWeek?`\n${weekLabel(c.week)}`:""}`,
+  `**${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}**\n${c.obj}${c.hab&&OAHshort[c.hab]?`\n**Habilidad:** ${c.hab}) ${OAHshort[c.hab]}`:""}`,
+  indTxt(c.ind),`**(${c.t[0]} min)** ${c.ini}`,`**(${c.t[1]} min)** ${c.des}`,`**(${c.t[2]} min)** ${c.cie}`,
+  `${c.ev.join("\n")}\n**Recursos:** ${c.res}`],...adRow(c)])}}
+/* Clase a clase: ficha horizontal, tabla completa horizontal y tabla completa vertical (columnas = clases) */
+const classHead=c=>`Clase ${c.num} (${c.dur} min) · ${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")} · ${weekLabel(c.week)}`;
+const habS=c=>c.hab&&OAH[c.hab]?`${c.hab}) ${OAHshort[c.hab]}`:"—";
+const attS=c=>c.att?`${c.att}) ${OAAshort[c.att]}`:"—";
+const momTxt=(c,i)=>`**(${c.t[i]} min)** ${[c.ini,c.des,c.cie][i]}`;
+const oaObj=c=>`**${c.sum?"Evaluación sumativa":c.oas.map(oaName).join(", ")}**\n${c.obj}`;
+const ELEM=["OA y objetivo","Indicadores","Habilidad","Inicio","Desarrollo","Cierre","Evaluación","Actitud","Recursos"];
+const elemRow=c=>[oaObj(c),indTxt(c.ind),habS(c),momTxt(c,0),momTxt(c,1),momTxt(c,2),c.ev.join("\n"),attS(c),c.res];
+function fichaH(c){return{t:"table",w:[.14,.11,.08,.12,.17,.11,.1,.09,.08],head:ELEM,rows:[elemRow(c),...adRow(c)]}}
+function fullTable(cs){return{t:"table",w:[.06,.13,.11,.08,.11,.15,.1,.09,.09,.08],head:["Clase",...ELEM],
+ rows:cs.flatMap(c=>[[`**${c.num}**\n${c.dur} min\n${weekLabel(c.week)}`,...elemRow(c)],...adRow(c)])}}
+function transTable(cs){const R=cs.map(c=>[["Semana",weekLabel(c.week)],...classRows(c)]);
+ return{t:"table",w:[.16,...cs.map(()=>.84/cs.length)],head:["Elemento",...cs.map(c=>`Clase ${c.num} (${c.dur} min)`)],
+  rows:R[0].map((r,i)=>[`**${r[0]}**`,...R.map(x=>x[i][1])])}}
 function classRows(c){return[["Objetivo de la clase",c.obj],["OA",c.oas.map(oaName).join(", ")],["Indicadores",indTxt(c.ind)],["Habilidad",`${c.hab}) ${OAH[c.hab]}`],
  ["Actividad",`**Inicio (${c.t[0]} min):** ${c.ini}\n**Desarrollo (${c.t[1]} min):** ${c.des}\n**Cierre (${c.t[2]} min):** ${c.cie}`],["Evaluación",c.ev.join("\n")],["Adecuación",c.ad.join("\n")||"—"],["Actitud",attTxt(c.att)],["Recursos",c.res]]}
 
@@ -1725,9 +1778,10 @@ const xe=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'
 function runs(line,o){return line.split(/(\*\*.+?\*\*)/g).filter(Boolean).map(seg=>{const b=/^\*\*.+\*\*$/.test(seg);const t=b?seg.slice(2,-2):seg;
  return`<w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>${(b||o.b)?"<w:b/>":""}${o.color?`<w:color w:val="${o.color}"/>`:""}<w:sz w:val="${o.sz||20}"/><w:szCs w:val="${o.sz||20}"/></w:rPr><w:t xml:space="preserve">${xe(t)}</w:t></w:r>`}).join("")}
 function para(s,o={},ppr=""){return String(s).split("\n").map(l=>`<w:p><w:pPr>${ppr}<w:spacing w:before="${o.before||0}" w:after="${o.after??60}"/></w:pPr>${runs(l,o)}</w:p>`).join("")}
-const W=10440;
+/* Ancho útil de la página en dxa (carta, márgenes de 900): vertical 10440, horizontal 14040 */
+const pageW=()=>S.orient==="h"?15840-1800:12240-1800;
 function tbl(rows,widths,headRow,keyCol){
- const ws=widths.map(f=>Math.round(W*f));const bd=["top","left","bottom","right","insideH","insideV"].map(k=>`<w:${k} w:val="single" w:sz="4" w:space="0" w:color="BFC9D6"/>`).join("");
+ const W=pageW(),ws=widths.map(f=>Math.round(W*f));const bd=["top","left","bottom","right","insideH","insideV"].map(k=>`<w:${k} w:val="single" w:sz="4" w:space="0" w:color="BFC9D6"/>`).join("");
  let x=`<w:tbl><w:tblPr><w:tblW w:w="${W}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>${bd}</w:tblBorders><w:tblCellMar><w:top w:w="50" w:type="dxa"/><w:left w:w="90" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/><w:right w:w="90" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${ws.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>`;
  const cell=(c,w,shade,bold)=>`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${shade?`<w:shd w:val="clear" w:color="auto" w:fill="${shade}"/>`:""}</w:tcPr>${para(c,{sz:18,after:30,b:bold})}</w:tc>`;
  if(headRow)x+=`<w:tr><w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>${headRow.map((h,i)=>cell(h,ws[i],"DCE5F0",true)).join("")}</w:tr>`;
@@ -1748,7 +1802,7 @@ async function makeDocx(B){
  const zip=new JSZip();
  zip.file("[Content_Types].xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
  zip.file("_rels/.rels",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
- zip.file("word/document.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${blocksXML(B)}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1000" w:right="900" w:bottom="1000" w:left="900" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr></w:body></w:document>`);
+ zip.file("word/document.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${blocksXML(B)}<w:sectPr>${S.orient==="h"?`<w:pgSz w:w="15840" w:h="12240" w:orient="landscape"/>`:`<w:pgSz w:w="12240" w:h="15840"/>`}<w:pgMar w:top="1000" w:right="900" w:bottom="1000" w:left="900" w:header="500" w:footer="500" w:gutter="0"/></w:sectPr></w:body></w:document>`);
  return zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
 }
 
@@ -1757,6 +1811,7 @@ let blocks=[];
 function renderDoc(){
  if(!D)return;
  const empty=!S.sel.size;$("#dl").disabled=empty;$("#cp").disabled=empty;
+ $("#doc").classList.toggle("land",S.orient==="h");
  if(empty){$("#doc").innerHTML=`<div class="empty"><strong>El documento aparecerá aquí</strong>Selecciona uno o más OA para generar la planificación.</div>`;return}
  blocks=buildBlocks();$("#doc").innerHTML=blocksHTML(blocks);
 }

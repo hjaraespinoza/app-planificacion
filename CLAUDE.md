@@ -31,6 +31,15 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 - Sumativa: `INSTR` (rúbricas, prueba, `paes`, escala, cotejo, portafolio). `S.pts` puntaje total y `S.bloom` [% básicas, intermedias, superiores]; `bloomPts()` reparte; `instrBlocks()` arma tabla Bloom + tabla de especificaciones (prueba/PAES) o criterios con puntaje.
 - `buildBlocks()` → `blocksHTML()` vista previa y `blocksXML()`/`makeDocx()` Word con JSZip 3.10.1 (cdnjs). Descarga: `claude.use("downloads")` dentro de Claude, Blob fuera.
 
+## Orientación de la página
+- `S.orient` ("v" vertical por defecto | "h" horizontal). Selector `data-orient` en la última sección de opciones ("Orientación de la página").
+- `pageW()` da el ancho útil para `tbl()` (carta con márgenes de 900: 10440 vertical, 14040 horizontal); `makeDocx` usa `<w:pgSz … w:orient="landscape"/>` en horizontal. La vista previa agrega la clase `.doc.land` (más ancha).
+
+## Orientación de la tabla de planificación
+- `S.tblOr` ("v" predeterminada | "h" horizontal). Selector `data-tblor` en la sección siguiente a "Orientación de la página".
+- "v" = diseño habitual de cada modalidad. "h" = `hTable(cs, showWeek)`: una fila por clase con columnas Clase · OA y objetivo (con habilidad) · Indicadores · Inicio · Desarrollo · Cierre · Evaluación y recursos, más `adRow(c)` debajo. Se usa en semanal, mensual y por unidad. Se recomienda combinarla con página horizontal (el hint lo sugiere).
+- Clase a clase: `S.claseFmt` ("ficha" predeterminado | "tabla"), selector `data-clasefmt` en Temporalidad (solo visible en ese modo). Combinaciones: ficha+v = kv por clase (`classRows`); ficha+h = `fichaH(c)` (9 columnas `ELEM`, una fila + adecuaciones); tabla+h = `fullTable(C)` (columna Clase + `ELEM`, una fila por clase + `adRow`); tabla+v = `transTable(cs)` (una fila por elemento de `classRows` + Semana, una columna por clase; 3 clases por tabla, 4 con página horizontal).
+
 ## Documento generado
 - Semanal, mensual y por unidad: tablas con una fila por clase y, debajo, una fila de ancho completo con sus adecuaciones (`adRow(c)` devuelve `{full:…}`; `blocksHTML` usa `colspan` y `tbl()` usa `gridSpan` en el Word).
 
