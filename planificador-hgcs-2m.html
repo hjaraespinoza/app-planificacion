@@ -83,6 +83,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .empty strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:16px;margin-bottom:4px}
 .sec{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px}
 .sec:last-child{border-bottom:0}
+.sec-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sec-h .btn-mini{font-size:11px;padding:2px 8px}
 .sec h3{margin:0;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .sub{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
 .sub h4{margin:0;font-size:13px;font-family:var(--f-display)}
@@ -1362,10 +1364,10 @@ const unitOf=n=>UNITS.find(u=>u.oas.includes(n));
 
 /* ============ ESTADO ============ */
 const S={subj:null,key:null,selBy:{},sel:new Set(),mode:"clase",nClases:4,semanas:2,meses:1,semU:null,cps:2,dur:90,durs:[90,90,90,90],
- mom:{diag:true,form:true,sum:true},instr:"rub_ensayo",formStrat:"ticket",seed:12345,pts:60,bloom:[30,45,25],
+ mom:{diag:false,form:false,sum:false},momV:2,instr:"rub_ensayo",formStrat:"ticket",seed:12345,pts:60,bloom:[30,45,25],
  oah:null,oaa:null,nee:new Set(["dua"]),neeNote:"",datos:{esc:"",doc:"",curso:"",anio:"2027",inicio:""},q:""};
 try{const raw=localStorage.getItem("plan-oa-v2");if(raw){const o=JSON.parse(raw);
- Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:"",selBy:o.selBy||{},bloom:Array.isArray(o.bloom)&&o.bloom.length===3?o.bloom:[30,45,25],mom:Object.assign({diag:true,form:true,sum:true},o.mom||{})});}}catch(e){}
+ Object.assign(S,o,{sel:new Set(o.sel||[]),nee:new Set(o.nee||["dua"]),oah:o.oah?new Set(o.oah):null,oaa:o.oaa?new Set(o.oaa):null,q:"",selBy:o.selBy||{},bloom:Array.isArray(o.bloom)&&o.bloom.length===3?o.bloom:[30,45,25],mom:Object.assign({diag:false,form:false,sum:false},o.momV===2&&o.mom||{}),momV:2});}}catch(e){}
 if(S.key&&!SUBJ[S.key]){S.key=null}
 if(!INSTR[S.instr])S.instr="rub_ensayo";
 if(!Array.isArray(S.durs)||S.durs.length!==4||S.durs.some(x=>!(x>0)))S.durs=Array(4).fill(S.dur||90);
@@ -1445,7 +1447,7 @@ function renderCfg(){
   ${durRow}
   <div class="hint">Total: <b>${totalClasses()} clases</b> para ${S.sel.size} OA · Cada semana: ${durSummary()} (<b>${weekMinutes()} min</b>).${hintU}</div>
  </div>
- <div class="sec"><h3>Evaluación</h3>
+ <div class="sec"><div class="sec-h"><h3>Evaluación</h3>${(()=>{const all=S.mom.diag&&S.mom.form&&S.mom.sum;return `<button type="button" class="btn-mini" data-act="momall" aria-pressed="${all}">${all?"Quitar todas":"Seleccionar todas"}</button>`})()}</div>
   <div class="chips" role="group" aria-label="Tipos de evaluación">
    ${[["diag","Diagnóstica"],["form","Formativa"],["sum","Sumativa"]].map(([k,v])=>`<button type="button" class="chip" data-mom="${k}" aria-pressed="${S.mom[k]}">${v}</button>`).join("")}
   </div>
@@ -1491,6 +1493,7 @@ cfg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
  if(b.dataset.oah){const s=new Set(curOAH());s.has(b.dataset.oah)?s.delete(b.dataset.oah):s.add(b.dataset.oah);S.oah=s;update();return}
  if(b.dataset.oaa){const s=new Set(curOAA());s.has(b.dataset.oaa)?s.delete(b.dataset.oaa):s.add(b.dataset.oaa);S.oaa=s;update();return}
  if(b.dataset.reset){S[b.dataset.reset]=null;update();return}
+ if(b.dataset.act==="momall"){const v=!(S.mom.diag&&S.mom.form&&S.mom.sum);S.mom={diag:v,form:v,sum:v};update();return}
  if(b.dataset.act==="reroll"){S.seed=(Date.now()%2147483647)||1;renderDoc();save();msg("Se sortearon nuevamente las evaluaciones formativas.","ok");return}
 });
 const clampInt=(v,a,b,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.min(b,Math.max(a,v))};
@@ -1647,12 +1650,11 @@ function buildBlocks(){
   });
   if(!byMonth){B.push({t:"h3",x:"Estructura sugerida de cada clase"});uniq(weekDurs()).forEach(d=>{const t=times(d);B.push({t:"p",x:`**Clases de ${d} min:** inicio (${t[0]} min): pregunta problematizadora y objetivo · desarrollo (${t[1]} min): actividad central · cierre (${t[2]} min): evaluación formativa ${S.mom.form?formLabel():"y síntesis colectiva"}.`})})}
  }
- B.push({t:"h2",x:"Evaluación"});
  const evRows=[];
  if(S.mom.diag)evRows.push(["Diagnóstica","Cuestionario breve de conceptos previos al inicio, sin calificación, para ajustar la secuencia."]);
  if(S.mom.form){const used=uniq(C.filter(c=>!c.sum).map(c=>FORM[c.fk].n));evRows.push(["Formativa",S.formStrat==="random"?`Estrategias asignadas aleatoriamente a las clases: ${used.join(", ")}. Se retroalimenta al inicio de la clase siguiente.`:`${FORM[S.formStrat].n} al cierre de cada clase, con retroalimentación al inicio de la siguiente.`])}
  if(S.mom.sum)evRows.push(["Sumativa",`${INSTR[S.instr].n}. ${INSTR[S.instr].d} Puntaje total: ${S.pts} puntos. Nota 4,0 con el 60 % de logro (${Math.ceil(S.pts*.6)} puntos).${C.length<3?" Con menos de 3 clases planificadas, se sugiere aplicarla en una clase posterior.":""}`]);
- if(evRows.length)B.push({t:"kv",rows:evRows});
+ if(evRows.length){B.push({t:"h2",x:"Evaluación"});B.push({t:"kv",rows:evRows})}
  if(S.mom.sum)instrBlocks(B,oas);
  B.push({t:"small",x:`Documento generado con el Planificador de OA. Textos de OA adaptados de las ${D.dec||"Bases Curriculares 7° básico a 2° medio (Decreto 614/2013)"}; verificar la redacción oficial en curriculumnacional.cl.`});
  return B;
