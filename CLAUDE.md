@@ -36,6 +36,8 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 
 ## Respaldo
 - Tag y release de GitHub `respaldo-2026-11-18` (commit 5a5036a): 8 asignaturas, 20 niveles, adecuaciones por clase.
+- Tag y release de GitHub `respaldo-2026-11-19` (commit 707374c): agrega duración distinta para cada clase de la semana.
+- Tag y release de GitHub `respaldo-2026-11-19b` (commit fe7213a): evaluaciones desmarcadas por defecto con botón "Seleccionar todas" (estado `S.momV:2` ignora la selección guardada antigua). Es el respaldo más reciente.
 
 ## Pendientes / notas
 - Textos de OA adaptados (no literales); verificar con curriculumnacional.cl si se requiere redacción oficial.
