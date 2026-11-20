@@ -56,7 +56,8 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 - Tag y release de GitHub `respaldo-2026-11-19` (commit 707374c): agrega duración distinta para cada clase de la semana.
 - Tag y release de GitHub `respaldo-2026-11-19b` (commit fe7213a): evaluaciones desmarcadas por defecto con botón "Seleccionar todas" (estado `S.momV:2` ignora la selección guardada antigua).
 - Tag y release de GitHub `respaldo-2026-11-19d` (commit ef81c10): orientación de página, orientación de la tabla y ficha o tabla en clase a clase.
-- Tag y release de GitHub `respaldo-2026-11-19e` (commit f32b09e): agrega 5° a 8° básico en Historia, Matemática, Ciencias Naturales y Educación Física (36 niveles en 9 asignaturas). Es el respaldo más reciente. (El tag local `respaldo-2026-11-19c` apunta al mismo estado que 19b y no se subió.)
+- Tag y release de GitHub `respaldo-2026-11-19e` (commit f32b09e): agrega 5° a 8° básico en Historia, Matemática, Ciencias Naturales y Educación Física (36 niveles en 9 asignaturas).
+- Tag y release de GitHub `respaldo-2026-11-20` (commit d1c2284): agrega el interruptor de modo oscuro. Es el respaldo más reciente. (El tag local `respaldo-2026-11-19c` apunta al mismo estado que 19b y no se subió.)
 
 ## Pendientes / notas
 - Textos de OA adaptados (no literales); verificar con curriculumnacional.cl si se requiere redacción oficial.
