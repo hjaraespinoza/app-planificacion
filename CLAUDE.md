@@ -34,6 +34,11 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 - Sumativa: `INSTR` (rúbricas, prueba, `paes`, escala, cotejo, portafolio). `S.pts` puntaje total y `S.bloom` [% básicas, intermedias, superiores]; `bloomPts()` reparte; `instrBlocks()` arma tabla Bloom + tabla de especificaciones (prueba/PAES) o criterios con puntaje.
 - `buildBlocks()` → `blocksHTML()` vista previa y `blocksXML()`/`makeDocx()` Word con JSZip 3.10.1 (cdnjs). Descarga: `claude.use("downloads")` dentro de Claude, Blob fuera.
 
+## Modo oscuro
+- Botón `#theme` (`role="switch"`, luna + "Modo oscuro" + pista `.sw`) en la cabecera; `header.top` es grid con áreas `intro`/`theme`/`steps` (en ≤860 px el botón queda arriba de todo).
+- Fija `data-theme="dark"|"light"` en `<html>` y guarda la elección en localStorage `plan-oa-theme` (aparte de `plan-oa-v2`); un `<script>` en la cabecera la aplica antes de pintar. Sin elección guardada sigue `prefers-color-scheme`. Las variables de color ya existían en `:root` para ambos modos.
+- La copia de respaldo (selección + `execCommand`) fuerza modo claro mientras copia para que Word no reciba fondos oscuros. El .docx no depende del tema.
+
 ## Orientación de la página
 - `S.orient` ("v" vertical por defecto | "h" horizontal). Selector `data-orient` en la última sección de opciones ("Orientación de la página").
 - `pageW()` da el ancho útil para `tbl()` (carta con márgenes de 900: 10440 vertical, 14040 horizontal); `makeDocx` usa `<w:pgSz … w:orient="landscape"/>` en horizontal. La vista previa agrega la clase `.doc.land` (más ancha).

@@ -3,6 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>/* Aplica el modo guardado antes de pintar la página (sin preferencia guardada sigue al sistema) */try{const t=localStorage.getItem("plan-oa-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <style>
 /* Layout: subject/level picker on top, then a two-column workbench (OA list | planning options), then a full-width preview that mirrors the Word output */
 :root{
@@ -27,7 +28,19 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
 .wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+header.top{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"intro theme" "intro steps";gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.top-intro{grid-area:intro;min-width:0}
+header.top .steps{grid-area:steps;justify-self:end;align-self:end}
+@media (max-width:860px){header.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"theme" "intro" "steps"}header.top .steps{justify-self:start}}
+/* Interruptor de modo oscuro: luna + texto + pista que muestra si está activado */
+.theme-btn{grid-area:theme;justify-self:end;align-self:start;font:inherit;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 6px 5px 12px}
+.theme-btn:hover{border-color:var(--accent)}
+.theme-btn svg{width:16px;height:16px;flex:none;color:var(--muted)}
+.theme-btn .sw{position:relative;width:34px;height:20px;border-radius:999px;background:var(--line);flex:none}
+.theme-btn .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.theme-btn[aria-checked=true] svg{color:var(--accent)}
+.theme-btn[aria-checked=true] .sw{background:var(--accent)}
+.theme-btn[aria-checked=true] .sw::after{transform:translateX(14px);background:var(--accent-ink)}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 h1{font-family:var(--f-display);font-size:28px;line-height:1.15;margin:4px 0 0;text-wrap:balance}
 .lede{color:var(--muted);max-width:66ch;margin:6px 0 0}
@@ -144,12 +157,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .doc td.ad{background:var(--soft);border-left:3px solid var(--accent);font-size:12px}
 .doc td p{margin:0 0 4px}.doc td p:last-child{margin:0}
 .note{font-size:12px;color:var(--muted);margin-top:10px;max-width:80ch}
-@media (prefers-reduced-motion:no-preference){.oa,.chip,.btn,.subj,.lvl{transition:background-color .15s,border-color .15s,color .15s}}
+@media (prefers-reduced-motion:no-preference){.oa,.chip,.btn,.subj,.lvl{transition:background-color .15s,border-color .15s,color .15s}.theme-btn .sw,.theme-btn .sw::after{transition:transform .15s,background-color .15s}}
 </style>
 
 <div class="wrap">
   <header class="top">
-    <div>
+    <button class="theme-btn" id="theme" type="button" role="switch" aria-checked="false" title="Activar el modo oscuro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <span>Modo oscuro</span><span class="sw" aria-hidden="true"></span>
+    </button>
+    <div class="top-intro">
       <div class="eyebrow" id="eyebrow">Planificación curricular · Bases Curriculares 5° básico a 4° medio</div>
       <h1>Planificador de OA</h1>
       <p class="lede">Elige la asignatura y el nivel, selecciona los Objetivos de Aprendizaje, define el tiempo y la evaluación, y descarga la planificación en Word con indicadores, objetivos de clase, actividades, adecuaciones y actitudes.</p>
@@ -3144,8 +3161,19 @@ $("#dl").addEventListener("click",async()=>{
 $("#cp").addEventListener("click",async()=>{
  const el=$("#doc");const html=`<div style="font-family:Calibri,Arial,sans-serif">${el.innerHTML.replace(/<table>/g,'<table border="1" cellpadding="5" style="border-collapse:collapse;width:100%">')}</div>`;
  try{if(!window.ClipboardItem)throw 0;await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([el.innerText],{type:"text/plain"})})]);msg("Copiado. Pégalo en Word o Google Docs.","ok")}
- catch(e){try{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);const ok=document.execCommand("copy");msg(ok?"Copiado. Pégalo en Word o Google Docs.":"Texto seleccionado: presiona Ctrl+C para copiar.",ok?"ok":"")}catch(_){msg("Selecciona el documento y presiona Ctrl+C.","err")}}
+ catch(e){const root=document.documentElement,prev=root.getAttribute("data-theme");
+  /* La copia por selección lleva los colores en pantalla: se copia en modo claro para que Word no reciba fondos oscuros */
+  try{root.setAttribute("data-theme","light");const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);const ok=document.execCommand("copy");msg(ok?"Copiado. Pégalo en Word o Google Docs.":"Texto seleccionado: presiona Ctrl+C para copiar.",ok?"ok":"")}catch(_){msg("Selecciona el documento y presiona Ctrl+C.","err")}
+  finally{prev===null?root.removeAttribute("data-theme"):root.setAttribute("data-theme",prev)}}
 });
+/* Modo oscuro: el interruptor fija data-theme en <html> y guarda la elección en "plan-oa-theme" */
+(()=>{const root=document.documentElement,btn=$("#theme"),mq=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
+ const isDark=()=>{const t=root.getAttribute("data-theme");return t==="dark"||(t!=="light"&&!!(mq&&mq.matches))};
+ const sync=()=>{const d=isDark();btn.setAttribute("aria-checked",d?"true":"false");btn.title=d?"Desactivar el modo oscuro":"Activar el modo oscuro"};
+ btn.addEventListener("click",()=>{const t=isDark()?"light":"dark";root.setAttribute("data-theme",t);try{localStorage.setItem("plan-oa-theme",t)}catch(e){}sync()});
+ if(mq){if(mq.addEventListener)mq.addEventListener("change",sync);else if(mq.addListener)mq.addListener(sync)}
+ new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:["data-theme"]});
+ sync()})();
 $("#q").value="";
 update();
 </script>

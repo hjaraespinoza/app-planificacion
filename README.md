@@ -23,6 +23,7 @@ Aplicación web para planificar Objetivos de Aprendizaje del currículum chileno
 - En la evaluación sumativa defines el puntaje total y el porcentaje de habilidades cognitivas básicas, intermedias y superiores (taxonomía de Bloom); la tabla de especificaciones o la rúbrica reparte el puntaje según esos porcentajes.
 - Propone habilidades, actitudes y adecuaciones (DUA, TEA, TDAH, DEA y otras).
 - Descarga la planificación como documento Word (.docx) con indicadores, objetivos de clase, actividades, adecuaciones y actitudes.
+- Interruptor «Modo oscuro» en la parte superior: lo activas o desactivas con un clic y la app recuerda tu elección (sin elección guardada sigue el modo del sistema). El Word descargado no cambia.
 
 ## Uso
 
