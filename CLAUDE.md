@@ -8,7 +8,7 @@ App web (un solo HTML, sin build) para planificar OA del currículum chileno. El
 - `README.md`.
 
 ## Publicación
-- Artifact Claude (privado): https://claude.ai/artifact/KaW3QGVViZeF97yrzHEYPp. Actualizar con Artifact publish y `url` de ese enlace (capability `downloads: true` ya declarada). Versión 11 (19-11-2026) incluye 5° a 8° básico. Ojo: desde una sesión nueva, la herramienta exige leer completa la versión publicada antes de reemplazarla (con ~400 KB fueron 8 lecturas por tramos de ~52 KB); con la fuente actual de ~770 KB serán el doble. Conviene publicar desde la misma sesión que hace los cambios.
+- Artifact Claude (privado): https://claude.ai/artifact/KaW3QGVViZeF97yrzHEYPp. Actualizar con Artifact publish y `url` de ese enlace (capability `downloads: true` ya declarada). Versión 12 (20-11-2026) incluye 5° a 8° básico y el interruptor de modo oscuro (igual al commit d1c2284). Ojo: desde una sesión nueva, la herramienta exige leer completa la versión publicada antes de reemplazarla (con ~400 KB fueron 8 lecturas por tramos de ~52 KB); con la fuente actual de ~770 KB serán el doble. Conviene publicar desde la misma sesión que hace los cambios.
 - GitHub (público): repo `hjaraespinoza/app-planificacion`, rama `main`, Pages en https://hjaraespinoza.github.io/app-planificacion/ (se actualiza solo al hacer push). Commit/push solo cuando el usuario lo pida.
 - Herramientas: Git en `C:\Program Files\Git\cmd\git.exe`, GitHub CLI en `C:\Program Files\GitHub CLI\gh.exe` (sesión iniciada como hjaraespinoza). Autor git configurado solo en este repo con correo noreply.
 
